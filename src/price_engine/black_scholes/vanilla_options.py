@@ -7,46 +7,53 @@ from jax.scipy.special import erf
 
 _SQRT_2 = jnp.sqrt(2.0)
 
+@jax.jit
+def _compute_undiscounted_call_prices(spots, strikes, expires, vols, discount_factors):
+    forwards = discount_factors * spots
 
-def _vanilla_price(
-        spot,
-        strike,
-        expire,
-        vol,
-        discount_rate=None,
-        dividend_rate=None,
-        is_call: jnp.bool_ = True,
-        dtype: jnp.dtype = None):
-    if dtype is not None:
-        spot = jnp.astype(spot, dtype)
-        strike = jnp.astype(strike, dtype)
-        expire = jnp.astype(expire, dtype)
-        vol = jnp.astype(vol, dtype)
+    vol_sqrt_t = vols * jnp.sqrt(expires)
 
-    if discount_rate is None:
-        discount_rate = jnp.float32(0.0)
-
-    if dividend_rate is None:
-        dividend_rate = jnp.float32(0.0)
-
-    _D = jnp.exp((discount_rate - dividend_rate) * expire)
-    forward = _D * spot
-
-    vol_sqrt_t = vol * jnp.sqrt(expire)
-
-    d1 = jnp.divide(jnp.log(forward / strike), vol_sqrt_t) + vol_sqrt_t / 2
+    d1 = jnp.divide(jnp.log(forwards / strikes), vol_sqrt_t) + vol_sqrt_t / 2
     d2 = d1 - vol_sqrt_t
 
-    call_price = _D * (_ncdf(d1) * forward - _ncdf(d2) * strike)
+    return _ncdf(d1) * forwards - _ncdf(d2) * strikes
 
-    if is_call:
-        return call_price
-    else:
-        return call_price + _D * strike - spot
+def vanilla_price(
+        spots: jax.Array,
+        strikes: jax.Array,
+        expires: jax.Array,
+        vols: jax.Array,
+        discount_rates: jax.Array = None,
+        dividend_rates: jax.Array = None,
+        are_calls: jax.Array = None,
+        dtype: jnp.dtype = None):
+    shape = spots.shape
+
+    if dtype is not None:
+        spots = jnp.astype(spots, dtype)
+        strikes = jnp.astype(strikes, dtype)
+        expires = jnp.astype(expires, dtype)
+        vols = jnp.astype(vols, dtype)
+
+    if discount_rates is None:
+        discount_rates = jnp.zeros(shape, dtype=dtype)
+
+    if dividend_rates is None:
+        dividend_rates = jnp.zeros(shape, dtype=dtype)
+
+    discount_factors = jnp.exp((discount_rates - dividend_rates) * expires)
+    forwards = discount_factors * spots
+
+    undiscounted_calls = _compute_undiscounted_call_prices(spots, strikes, expires, vols, discount_factors)
+
+    if are_calls is None:
+        return discount_factors * undiscounted_calls
+
+    undiscounted_forwards = forwards - strikes
+    undiscouted_puts = undiscounted_calls - undiscounted_forwards
+    return discount_factors * jnp.where(are_calls, undiscounted_calls, undiscouted_puts)
 
 
-vanilla_price = jax.vmap(_vanilla_price)
-
-
+@jax.jit
 def _ncdf(x):
     return (erf(x / _SQRT_2) + 1) / 2
