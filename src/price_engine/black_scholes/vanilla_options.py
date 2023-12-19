@@ -7,6 +7,7 @@ from jax.scipy.special import erf
 
 _SQRT_2 = jnp.sqrt(2.0)
 
+
 @jax.jit
 def _compute_undiscounted_call_prices(spots, strikes, expires, vols, discount_factors):
     forwards = discount_factors * spots
@@ -18,15 +19,30 @@ def _compute_undiscounted_call_prices(spots, strikes, expires, vols, discount_fa
 
     return _ncdf(d1) * forwards - _ncdf(d2) * strikes
 
+
 def vanilla_price(
-        spots: jax.Array,
-        strikes: jax.Array,
-        expires: jax.Array,
-        vols: jax.Array,
-        discount_rates: jax.Array = None,
-        dividend_rates: jax.Array = None,
-        are_calls: jax.Array = None,
-        dtype: jnp.dtype = None):
+    spots: jax.Array,
+    strikes: jax.Array,
+    expires: jax.Array,
+    vols: jax.Array,
+    discount_rates: jax.Array = None,
+    dividend_rates: jax.Array = None,
+    are_calls: jax.Array = None,
+    dtype: jnp.dtype = None,
+) -> jax.Array:
+    """
+    Compute the option prices for european options using the Black '76 model.
+
+    :param spots: (jax.Array): Array of current asset prices.
+    :param strikes: (jax.Array): Array of option strike prices.
+    :param expires: (jax.Array): Array of option expiration times.
+    :param vols: (jax.Array): Array of option volatility values.
+    :param discount_rates: (jax.Array): Array of risk-free interest rates. Defaults to None.
+    :param dividend_rates: (jax.Array): Array of dividend rates. Defaults to None.
+    :param are_calls: (jax.Array): Array of booleans indicating whether options are calls (True) or puts (False).
+    :param dtype: (jnp.dtype): Data type of the output. Defaults to None.
+    :return: jax.Array: Array of computed option prices.
+    """
     shape = spots.shape
 
     if dtype is not None:
@@ -44,7 +60,9 @@ def vanilla_price(
     discount_factors = jnp.exp((discount_rates - dividend_rates) * expires)
     forwards = discount_factors * spots
 
-    undiscounted_calls = _compute_undiscounted_call_prices(spots, strikes, expires, vols, discount_factors)
+    undiscounted_calls = _compute_undiscounted_call_prices(
+        spots, strikes, expires, vols, discount_factors
+    )
 
     if are_calls is None:
         return discount_factors * undiscounted_calls
