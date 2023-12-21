@@ -1,6 +1,8 @@
-@ECHO OFF
+ECHO OFF
 
 call %~dp0basedir.bat
+
+IF "%VIRTUAL_ENV%" NEQ "" goto end
 
 IF EXIST "%BASEDIR%\venv" (
     REM Activate the virtual environment
@@ -15,6 +17,4 @@ IF EXIST "%BASEDIR%\venv" (
 :activation
 call %BASEDIR%/venv/Scripts/activate.bat
 
-REM black src
-
-pylint src --output-format=text:pylint_res.txt,colorized --generate-toml-config
+:end
