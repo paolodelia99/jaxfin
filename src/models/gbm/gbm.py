@@ -71,7 +71,6 @@ class UnivGeometricBrownianMotion:
         # delta time
         dt = maturity / n
 
-        # initialize
         Xt = jnp.exp(
             (self.mean - self._sigma ** 2 / 2) * dt
             + self._sigma * jnp.random.normal(0, jnp.sqrt(dt), size=(n_sim, n)).T
@@ -79,5 +78,4 @@ class UnivGeometricBrownianMotion:
 
         Xt = jnp.vstack([jnp.ones(n_sim), Xt])
 
-        # from logreturns to prices: X -> S
         return self._s0 * Xt.cumprod(axis=0)

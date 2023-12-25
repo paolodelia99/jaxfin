@@ -1,1 +1,3 @@
-from gbm.gbm import UnivGeometricBrownianMotion
+from src.models import gbm
+
+__all__ = ['gbm']
