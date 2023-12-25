@@ -41,7 +41,7 @@ def vanilla_price(
     :param dividend_rates: (jax.Array): Array of dividend rates. Defaults to None.
     :param are_calls: (jax.Array): Array of booleans indicating whether options are calls (True) or puts (False).
     :param dtype: (jnp.dtype): Data type of the output. Defaults to None.
-    :return: jax.Array: Array of computed option prices.
+    :return: (jax.Array): Array of computed option prices.
     """
     shape = spots.shape
 

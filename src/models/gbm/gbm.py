@@ -1,45 +1,83 @@
+"""Geometric Brownian Motion class implementation"""
+import jax
 import jax.numpy as jnp
 
 
-class GeometricBrownianMotion:
+class UnivGeometricBrownianMotion:
+    """
+    Geometric Brownian Motion
 
-    def __init__(self, s0, mean, vols, dtype):
-        self.s0 = s0
-        self.mean = mean
-        self.vols = vols
-        self.dtype = dtype
+    Represent a 1-dimensional GBM
 
-    def simulate_bs(self, maturity, n, n_sim):
-        #TODO: add check dtype
+    # Example usage:
+    params = {
+        's0' : 10,
+        'dtype' : jnp.float32,
+        'mean' : 0.1,
+        'sigma': 0.3
+    }
 
+    gmb_process = GeometricBrownianMotion(**params)
+    paths = gmb_process.simulate_paths(maturity=1.0, n=100, n_sim=100)
+    """
+
+    def __init__(self, s0, mean, sigma, dtype):
+        if dtype is None:
+            raise ValueError('dtype must not be None')
+
+        self._dtype = dtype
+        self._s0 = jnp.asarray(s0, dtype=dtype)
+        self._mean = jnp.asarray(mean, dtype=dtype)
+        self._sigma = jnp.asarray(sigma, dtype=dtype)
+
+    @property
+    def mean(self):
+        """
+        :return: Returns the mean of the GBM
+        """
+        return self._mean
+
+    @property
+    def sigma(self):
+        """
+        :return: Returns the standard deviation of the GBM
+        """
+        return self._sigma
+
+    @property
+    def s0(self):
+        """
+        :return: Returns the initial value of the GBM
+        """
+        return self._s0
+
+    @property
+    def dtype(self):
+        """
+        :return: Returns the underlying dtype of the GBM
+        """
+        return self._dtype
+
+    @jax.jit
+    def simulate_paths(self, maturity, n: int, n_sim: int) -> jax.Array:
+        """
+        Simulate a sample of paths from the GBM
+
+        :param maturity: time in years
+        :param n: (int): number of steps
+        :param n_sim: (int): number of simulations
+        :return: (jax.Array): Array containing the sample paths
+        """
         # delta time
         dt = maturity / n
 
         # initialize
-        x = jnp.zeros((n_sim, n + 1))  # X = rt + X(t)
+        Xt = jnp.exp(
+            (self.mean - self._sigma ** 2 / 2) * dt
+            + self._sigma * jnp.random.normal(0, jnp.sqrt(dt), size=(n_sim, n)).T
+        )
 
-        # sample standard normal
-        z = jnp.random.randn(n_sim, n)  # sample all random variables
-
-        for i in range(n):
-            x[:, i + 1] = x[:, i] + (self.mean - self.vols ** 2 / 2) * dt + self.vols * jnp.sqrt(dt) * z[:, i]
+        Xt = jnp.vstack([jnp.ones(n_sim), Xt])
 
         # from logreturns to prices: X -> S
-        return self.s0 * jnp.exp(x)
-
-
-"""
-        # Example usage:
-        params = {
-            'S0': 100,
-            'T': 1,
-            'r': 0.05,
-            'N_SIM': 1000,
-            'N': 252,
-            'SIGMA': 0.2
-        }
-        
-        bs_simulator = BlackScholesSimulator(**params)
-        result = bs_simulator.simulate_bs()
-        print(result)
-"""
+        return self._s0 * Xt.cumprod(axis=0)
