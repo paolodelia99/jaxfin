@@ -8,3 +8,9 @@ venv/*
 
 # Pylint output
 pylint_res.txt
+
+# Examples folder 
+src/examples/
+
+# examples requirements
+src/examples/requirements.txt

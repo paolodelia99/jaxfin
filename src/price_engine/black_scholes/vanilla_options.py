@@ -7,6 +7,10 @@ from jax.scipy.special import erf
 
 _SQRT_2 = jnp.sqrt(2.0)
 
+@jax.jit
+def _d1(forwards, strikes, vol_sqrt_t):
+    return jnp.divide(jnp.log(forwards / strikes), vol_sqrt_t) + vol_sqrt_t / 2
+
 
 @jax.jit
 def _compute_undiscounted_call_prices(spots, strikes, expires, vols, discount_factors):
@@ -14,7 +18,7 @@ def _compute_undiscounted_call_prices(spots, strikes, expires, vols, discount_fa
 
     vol_sqrt_t = vols * jnp.sqrt(expires)
 
-    d1 = jnp.divide(jnp.log(forwards / strikes), vol_sqrt_t) + vol_sqrt_t / 2
+    d1 = _d1(forwards, strikes, vol_sqrt_t)
     d2 = d1 - vol_sqrt_t
 
     return _ncdf(d1) * forwards - _ncdf(d2) * strikes
@@ -75,3 +79,49 @@ def vanilla_price(
 @jax.jit
 def _ncdf(x):
     return (erf(x / _SQRT_2) + 1) / 2
+
+def delta_vanilla(spots: jax.Array,
+    strikes: jax.Array,
+    expires: jax.Array,
+    vols: jax.Array,
+    discount_rates: jax.Array = None,
+    dividend_rates: jax.Array = None,
+    are_calls: jax.Array = None,
+    dtype: jnp.dtype = None,
+) -> jax.Array:
+    """
+    Calculate the delta of a call/put option
+
+    :param spots:
+    :param strikes:
+    :param expires:
+    :param vols:
+    :param discount_rates:
+    :param dividend_rates:
+    :param are_calls:
+    :param dtype:
+    :return:
+    """
+    #FIXME: there is duplicated code here
+    shape = spots.shape
+
+    if dtype is not None:
+        spots = jnp.astype(spots, dtype)
+        strikes = jnp.astype(strikes, dtype)
+        expires = jnp.astype(expires, dtype)
+        vols = jnp.astype(vols, dtype)
+
+    if discount_rates is None:
+        discount_rates = jnp.zeros(shape, dtype=dtype)
+
+    if dividend_rates is None:
+        dividend_rates = jnp.zeros(shape, dtype=dtype)
+
+    discount_factors = jnp.exp((discount_rates - dividend_rates) * expires)
+    forwards = discount_factors * spots
+
+    vol_sqrt_t = vols * jnp.sqrt(expires)
+
+    d1s = _d1(forwards, strikes, vol_sqrt_t)
+
+    return _ncdf(d1s) if are_calls is None else jnp.where(are_calls, _ncdf(d1s), _ncdf(d1s) - 1)
