@@ -91,7 +91,7 @@ def _simulate_paths(seed: int, s0, mean, sigma, maturity, n_sim, n):
 
     Xt = jnp.exp(
         (mean - sigma ** 2 / 2) * dt
-        + sigma * random.normal(key, shape=(n_sim, n)).T
+        + sigma * jnp.sqrt(dt) * random.normal(key, shape=(n_sim, n - 1)).T
     )
 
     Xt = jnp.vstack([jnp.ones(n_sim), Xt])
