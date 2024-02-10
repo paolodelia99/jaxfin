@@ -20,3 +20,4 @@ jaxfin/examples/requirements.txt
 
 # Test results
 test_report.xml
+test_report.html

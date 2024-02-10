@@ -2,6 +2,6 @@
 
 call %~dp0configure-python.bat
 
-black src --check
+black jaxfin --check
 
 pause

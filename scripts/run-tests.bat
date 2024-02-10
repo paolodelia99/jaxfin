@@ -2,6 +2,6 @@
 
 call %~dp0configure-python.bat
 
-pytest --junit-xml=test_report.xml
+pytest --html=test_report.html --self-contained-html
 
 pause
