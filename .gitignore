@@ -5,6 +5,7 @@ venv/*
 # various caches
 **/.pytest_cache
 **/__pycache__/
+**/.mypy_cache
 
 # Pylint output
 pylint_res.txt
