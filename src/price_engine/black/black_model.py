@@ -43,7 +43,7 @@ def black_price(
     forwards = discount_factors * spots
 
     undiscounted_calls = compute_undiscounted_call_prices(
-        spots * discount_factors, strikes, expires, vols, discount_factors
+        forwards, strikes, expires, vols, discount_rates
     )
 
     if are_calls is None:
