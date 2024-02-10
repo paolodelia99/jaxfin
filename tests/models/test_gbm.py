@@ -1,6 +1,6 @@
 import jax.numpy as jnp
 
-from src.models.gbm.gbm import UnivGeometricBrownianMotion
+from jaxfin.models.gbm import UnivGeometricBrownianMotion
 
 
 class TestUnivGBM:

@@ -1,6 +1,6 @@
 import jax.numpy as jnp
 
-from src.price_engine.black import future_option_price
+from jaxfin.price_engine.black import future_option_price
 
 TOL = 1e-3
 DTYPE = jnp.float32

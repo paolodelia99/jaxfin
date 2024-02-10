@@ -1,6 +1,6 @@
 import jax.numpy as jnp
 
-from src.price_engine.black_scholes import european_price
+from jaxfin.price_engine.black_scholes import european_price
 
 TOL = 1e-3
 DTYPE = jnp.float32
