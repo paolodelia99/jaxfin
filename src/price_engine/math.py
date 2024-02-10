@@ -1,6 +1,7 @@
 import jax
 import jax.numpy as jnp
 from jax.scipy.special import erf
+from jax.scipy.stats.norm import pdf
 
 _SQRT_2 = jnp.sqrt(2.0)
 
@@ -15,3 +16,8 @@ def d1(spots, strikes, vols, expires, discount_rates):
 @jax.jit
 def cum_normal(x):
     return (erf(x / _SQRT_2) + 1) / 2
+
+
+@jax.jit
+def density_normal(x):
+    return pdf(x)
