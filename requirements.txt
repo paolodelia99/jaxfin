@@ -11,6 +11,7 @@ mccabe==0.7.0
 ml-dtypes==0.3.1
 mypy-extensions==1.0.0
 numpy==1.26.2
+nox==2023.4.22
 opt-einsum==3.3.0
 packaging==23.2
 pathspec==0.12.1

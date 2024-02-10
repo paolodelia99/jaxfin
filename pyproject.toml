@@ -1,3 +1,23 @@
+[project]
+name = "JaxFin"
+version = "0.0.1"
+authors = [
+  { name="Paolo D'Elia", email="paolo.delia99@gmail.com"},
+  { name="Samuele D'Elia", email="delia.samuele00@gmail.com"}
+]
+description = "JaxFin is a powerful and versatile Python library designed for pricing exotic options using a range of advanced financial techniques."
+readme = "README.md"
+requires-python = ">=3.10"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+]
+
+[project.urls]
+# Homepage = "https://github.com/pypa/sampleproject"
+# Issues = "https://github.com/pypa/sampleproject/issues"
+
 [tool.pylint.main]
 # Analyse import fallback blocks. This can be used to support both Python 2 and 3
 # compatible code, which means that the block might have code that exists only in
@@ -535,4 +555,10 @@ ignored-argument-names = "_.*|^ignored_|^unused_"
 # builtins.
 redefining-builtins-modules = ["six.moves", "past.builtins", "future.builtins", "builtins", "io"]
 
-
+[tool.pytest.ini_options]
+pythonpath = [
+    "."
+]
+addopts = [
+    "--import-mode=importlib",
+]
