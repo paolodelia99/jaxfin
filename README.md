@@ -62,9 +62,9 @@ Leverages convolution techniques to compute the option's price efficiently.
 
 # TODOs
 
-- [ ] Separate BS and Black model in two different files
-- [ ] Add tests 
+- [x] Separate BS and Black model in two different files
+- [x] Add tests 
 - [ ] see if it possible to use some fwd_propagation to calculate the greeks of the european
 - [ ] see where it is possible to jit the `simulate_paths` of UnivariateGBM
-- [ ] use tox for automation stuff
+- [x] use nox for automation stuff
 - [ ] create the package

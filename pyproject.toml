@@ -1,6 +1,9 @@
+[build-system]
+requires = ["setuptools", "setuptools-scm"]
+build-backend = "setuptools.build_meta"
+
 [project]
 name = "JaxFin"
-version = "0.0.1"
 authors = [
   { name="Paolo D'Elia", email="paolo.delia99@gmail.com"},
   { name="Samuele D'Elia", email="delia.samuele00@gmail.com"}
@@ -13,6 +16,21 @@ classifiers = [
     "License :: OSI Approved :: MIT License",
     "Operating System :: OS Independent",
 ]
+dependencies = [
+    "jax==0.4.23",
+    "jaxlib==0.4.23",
+    "numpy==1.26.2",
+    "scipy==1.11.4"
+]
+dynamic = ["version"]
+
+[tool.setuptools.packages.find]
+include = ["jaxfin*"]
+exclude = ["examples*"]
+
+
+[tool.setuptools_scm]
+
 
 [project.urls]
 # Homepage = "https://github.com/pypa/sampleproject"

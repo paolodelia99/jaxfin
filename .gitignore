@@ -2,6 +2,10 @@ tests/data/*.csv
 
 venv/*
 
+# Build related folders
+**/dist
+**/JaxFin.egg-info
+
 # various caches
 **/.pytest_cache
 **/__pycache__/
@@ -17,8 +21,11 @@ jaxfin/examples/
 jaxfin/examples/requirements.txt
 
 # Nox environments
-.nox/*
+**/.nox
 
 # Test results
 test_report.xml
 test_report.html
+
+# Version file
+jaxfin.VERSION
