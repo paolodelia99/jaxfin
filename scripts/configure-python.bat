@@ -15,6 +15,6 @@ IF EXIST "%BASEDIR%\venv" (
 
 :activation
 call %BASEDIR%/venv/Scripts/activate.bat
-python -m pip install -r requirements.txt
+python -m pip install -r requirements/build.txt
 
 :end
