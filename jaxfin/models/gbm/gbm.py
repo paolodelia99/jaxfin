@@ -60,7 +60,7 @@ class UnivGeometricBrownianMotion:
         return self._dtype
 
     def simulate_paths(
-        self, seed: int, maturity, n: int, n_sim: int, dtype=jnp.float32
+        self, seed: int, maturity, n: int, n_sim: int
     ) -> jax.Array:
         """
         Simulate a sample of paths from the GBM
@@ -70,35 +70,15 @@ class UnivGeometricBrownianMotion:
         :param n_sim: (int): number of simulations
         :return: (jax.Array): Array containing the sample paths
         """
-        # FIXME: Check dtypes of the input parameters to the function
-        return _simulate_paths(
-            seed, self._s0, self._mean, self._sigma, maturity, n_sim, n
+        key = random.PRNGKey(seed)
+
+        dt = maturity / n
+
+        Xt = jnp.exp(
+            (self._mean - self._sigma ** 2 / 2) * dt
+            + self._sigma * jnp.sqrt(dt) * random.normal(key, shape=(n_sim, n - 1)).T
         )
 
+        Xt = jnp.vstack([jnp.ones(n_sim), Xt])
 
-def _simulate_paths(seed: int, s0, mean, sigma, maturity, n_sim, n):
-    """
-    Simulate a sample path of GBM with the given parameter using jit
-
-    :param seed:
-    :param s0:
-    :param mean:
-    :param sigma:
-    :param maturity:
-    :param n_sim:
-    :param n:
-    :param dtype:
-    :return:
-    """
-    key = random.PRNGKey(seed)
-
-    dt = maturity / n
-
-    Xt = jnp.exp(
-        (mean - sigma**2 / 2) * dt
-        + sigma * jnp.sqrt(dt) * random.normal(key, shape=(n_sim, n - 1)).T
-    )
-
-    Xt = jnp.vstack([jnp.ones(n_sim), Xt])
-
-    return s0 * Xt.cumprod(axis=0)
+        return self._s0 * Xt.cumprod(axis=0)

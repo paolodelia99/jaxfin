@@ -1,9 +1,11 @@
 """
 Black '76 prices for options on forwards and futures
 """
-from ..math import *
-from ..utils import cast_arrays
+import jax
+import jax.numpy as jnp
+
 from ..common import compute_undiscounted_call_prices
+from ..utils import cast_arrays
 
 
 def black_price(
