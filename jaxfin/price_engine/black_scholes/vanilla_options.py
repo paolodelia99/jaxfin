@@ -8,13 +8,13 @@ from ..utils import cast_arrays
 
 
 def bs_price(
-        spots: jax.Array,
-        strikes: jax.Array,
-        expires: jax.Array,
-        vols: jax.Array,
-        discount_rates: jax.Array = None,
-        are_calls: jax.Array = None,
-        dtype: jnp.dtype = None,
+    spots: jax.Array,
+    strikes: jax.Array,
+    expires: jax.Array,
+    vols: jax.Array,
+    discount_rates: jax.Array = None,
+    are_calls: jax.Array = None,
+    dtype: jnp.dtype = None,
 ) -> jax.Array:
     """
     Compute the option prices for european options using the Black-Scholes model.
@@ -31,7 +31,9 @@ def bs_price(
     """
     shape = spots.shape
 
-    [spots, strikes, expires, vols] = cast_arrays([spots, strikes, expires, vols], dtype)
+    [spots, strikes, expires, vols] = cast_arrays(
+        [spots, strikes, expires, vols], dtype
+    )
 
     if discount_rates is None:
         discount_rates = jnp.zeros(shape, dtype=dtype)
@@ -49,14 +51,15 @@ def bs_price(
     return jnp.where(are_calls, calls, puts)
 
 
-def delta_vanilla(spots: jax.Array,
-                  strikes: jax.Array,
-                  expires: jax.Array,
-                  vols: jax.Array,
-                  discount_rates: jax.Array = None,
-                  are_calls: jax.Array = None,
-                  dtype: jnp.dtype = None,
-                  ) -> jax.Array:
+def delta_vanilla(
+    spots: jax.Array,
+    strikes: jax.Array,
+    expires: jax.Array,
+    vols: jax.Array,
+    discount_rates: jax.Array = None,
+    are_calls: jax.Array = None,
+    dtype: jnp.dtype = None,
+) -> jax.Array:
     """
     Calculate the delta of a call/put option
 
@@ -69,20 +72,27 @@ def delta_vanilla(spots: jax.Array,
     :param dtype:
     :return:
     """
-    [spots, strikes, expires, vols] = cast_arrays([spots, strikes, expires, vols], dtype)
+    [spots, strikes, expires, vols] = cast_arrays(
+        [spots, strikes, expires, vols], dtype
+    )
 
     d1s = d1(spots, strikes, vols, expires, discount_rates)
 
-    return cum_normal(d1s) if are_calls is None else jnp.where(are_calls, cum_normal(d1s), cum_normal(d1s) - 1)
+    return (
+        cum_normal(d1s)
+        if are_calls is None
+        else jnp.where(are_calls, cum_normal(d1s), cum_normal(d1s) - 1)
+    )
 
 
-def gamma_vanilla(spots: jax.Array,
-                  strikes: jax.Array,
-                  expires: jax.Array,
-                  vols: jax.Array,
-                  discount_rates: jax.Array = None,
-                  dtype: jnp.dtype = None,
-                  ) -> jax.Array:
+def gamma_vanilla(
+    spots: jax.Array,
+    strikes: jax.Array,
+    expires: jax.Array,
+    vols: jax.Array,
+    discount_rates: jax.Array = None,
+    dtype: jnp.dtype = None,
+) -> jax.Array:
     """
     Calculate the gamma of a european option
 
@@ -94,7 +104,9 @@ def gamma_vanilla(spots: jax.Array,
     :param dtype:
     :return:
     """
-    [spots, strikes, expires, vols] = cast_arrays([spots, strikes, expires, vols], dtype)
+    [spots, strikes, expires, vols] = cast_arrays(
+        [spots, strikes, expires, vols], dtype
+    )
 
     d1s = d1(spots, strikes, vols, expires, discount_rates)
 

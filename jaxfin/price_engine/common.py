@@ -20,4 +20,6 @@ def compute_undiscounted_call_prices(spots, strikes, expires, vols, discount_rat
 def compute_discounted_call_prices(spots, strikes, expires, vols, discount_rates):
     [_d1, _d2] = _compute_d1_d2(spots, strikes, expires, vols, discount_rates)
 
-    return cum_normal(_d1) * spots - cum_normal(_d2) * strikes * jnp.exp((- discount_rates) * expires)
+    return cum_normal(_d1) * spots - cum_normal(_d2) * strikes * jnp.exp(
+        (-discount_rates) * expires
+    )

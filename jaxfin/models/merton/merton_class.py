@@ -37,7 +37,9 @@ class MertonSimulator:
         NT = poisson.ppf(np.random.rand(self.N_SIM, 1), lambda_mert * self.T)
 
         # characteristic exponent
-        charexp = lambda u: -0.5 * sigma ** 2 * u ** 2 + lambda_mert * (np.exp(-0.5 * delta ** 2 * u ** 2 + 1j * mu * u) - 1)
+        charexp = lambda u: -0.5 * sigma**2 * u**2 + lambda_mert * (
+            np.exp(-0.5 * delta**2 * u**2 + 1j * mu * u) - 1
+        )
         drift = self.r - charexp(-1j)  # in order to be risk-neutral
 
         for j in range(self.N_SIM):
@@ -45,7 +47,9 @@ class MertonSimulator:
 
             for i in range(self.N):
                 # add diffusion component
-                x[j, i + 1] = x[j, i] + drift * dt + sigma * np.sqrt(dt) * np.random.randn()
+                x[j, i + 1] = (
+                    x[j, i] + drift * dt + sigma * np.sqrt(dt) * np.random.randn()
+                )
 
                 # add jump part if exists jump in ((i-1)*dt, i*dt)
                 for l in range(int(NT[j])):

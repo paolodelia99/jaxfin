@@ -7,14 +7,14 @@ from ..common import compute_undiscounted_call_prices
 
 
 def black_price(
-        spots: jax.Array,
-        strikes: jax.Array,
-        expires: jax.Array,
-        vols: jax.Array,
-        discount_rates: jax.Array = None,
-        dividend_rates: jax.Array = None,
-        are_calls: jax.Array = None,
-        dtype: jnp.dtype = None,
+    spots: jax.Array,
+    strikes: jax.Array,
+    expires: jax.Array,
+    vols: jax.Array,
+    discount_rates: jax.Array = None,
+    dividend_rates: jax.Array = None,
+    are_calls: jax.Array = None,
+    dtype: jnp.dtype = None,
 ) -> jax.Array:
     """
     Compute the option prices for european options using the Black '76 model.
@@ -31,7 +31,9 @@ def black_price(
     """
     shape = spots.shape
 
-    [spots, strikes, expires, vols] = cast_arrays([spots, strikes, expires, vols], dtype)
+    [spots, strikes, expires, vols] = cast_arrays(
+        [spots, strikes, expires, vols], dtype
+    )
 
     if discount_rates is None:
         discount_rates = jnp.zeros(shape, dtype=dtype)

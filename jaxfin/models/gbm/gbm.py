@@ -24,7 +24,7 @@ class UnivGeometricBrownianMotion:
 
     def __init__(self, s0, mean, sigma, dtype):
         if dtype is None:
-            raise ValueError('dtype must not be None')
+            raise ValueError("dtype must not be None")
 
         self._dtype = dtype
         self._s0 = jnp.asarray(s0, dtype=dtype)
@@ -59,7 +59,9 @@ class UnivGeometricBrownianMotion:
         """
         return self._dtype
 
-    def simulate_paths(self, seed: int, maturity, n: int, n_sim: int, dtype=jnp.float32) -> jax.Array:
+    def simulate_paths(
+        self, seed: int, maturity, n: int, n_sim: int, dtype=jnp.float32
+    ) -> jax.Array:
         """
         Simulate a sample of paths from the GBM
 
@@ -68,8 +70,11 @@ class UnivGeometricBrownianMotion:
         :param n_sim: (int): number of simulations
         :return: (jax.Array): Array containing the sample paths
         """
-        #FIXME: Check dtypes of the input parameters to the function
-        return _simulate_paths(seed, self._s0, self._mean, self._sigma, maturity, n_sim, n)
+        # FIXME: Check dtypes of the input parameters to the function
+        return _simulate_paths(
+            seed, self._s0, self._mean, self._sigma, maturity, n_sim, n
+        )
+
 
 def _simulate_paths(seed: int, s0, mean, sigma, maturity, n_sim, n):
     """
@@ -90,7 +95,7 @@ def _simulate_paths(seed: int, s0, mean, sigma, maturity, n_sim, n):
     dt = maturity / n
 
     Xt = jnp.exp(
-        (mean - sigma ** 2 / 2) * dt
+        (mean - sigma**2 / 2) * dt
         + sigma * jnp.sqrt(dt) * random.normal(key, shape=(n_sim, n - 1)).T
     )
 

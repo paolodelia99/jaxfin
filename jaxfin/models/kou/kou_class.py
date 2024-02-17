@@ -1,6 +1,7 @@
 import numpy as np
 from scipy.stats import poisson, expon
 
+
 class KouSimulator:
     def __init__(self, SIGMA, LAMBDA, LAMBDA_MINUS, LAMBDA_PLUS, P):
         self.SIGMA = SIGMA
@@ -11,7 +12,8 @@ class KouSimulator:
 
     def charexp(self, u):
         return -self.SIGMA**2 * u**2 / 2 + 1j * u * self.LAMBDA * (
-            self.P / (self.LAMBDA_PLUS - 1j * u) - (1 - self.P) / (self.LAMBDA_MINUS + 1j * u)
+            self.P / (self.LAMBDA_PLUS - 1j * u)
+            - (1 - self.P) / (self.LAMBDA_MINUS + 1j * u)
         )
 
     def simulate_kou(self, S0, T, r, N_SIM, N):
@@ -32,7 +34,9 @@ class KouSimulator:
 
             for i in range(N):
                 # add diffusion component
-                X[j, i + 1] = X[j, i] + drift * dt + self.SIGMA * np.sqrt(dt) * np.random.randn()
+                X[j, i + 1] = (
+                    X[j, i] + drift * dt + self.SIGMA * np.sqrt(dt) * np.random.randn()
+                )
 
                 # add jump part -> ( (i-1)dt, idt )
                 for l in range(int(NT[j])):
@@ -42,13 +46,16 @@ class KouSimulator:
                         if sim_p < self.P:  # positive jump
                             Y = expon.ppf(np.random.rand(), scale=1 / self.LAMBDA_PLUS)
                         else:  # negative jump
-                            Y = -expon.ppf(np.random.rand(), scale=1 / self.LAMBDA_MINUS)
+                            Y = -expon.ppf(
+                                np.random.rand(), scale=1 / self.LAMBDA_MINUS
+                            )
 
                         X[j, i + 1] = X[j, i + 1] + Y
 
         S = S0 * np.exp(X)
 
         return S
+
 
 """
 # Example usage:
