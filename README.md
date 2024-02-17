@@ -70,7 +70,8 @@ python -m build
 
 ### Sanity checks
 
-Since we want to keep the library maintainable over the long run, this implies that code has to attain to certain standards. Achieve the following scripts have been provided
+Since we want to keep the library maintainable over the long run, this implies that code has to attain to certain standards.
+To achieve that the following scripts have been provided
 
 - `scripts\run-pylint.bat`: This script runs Pylint, a tool that checks for errors in Python code, enforces a coding standard, and looks for code smells. It can also look for certain type errors, it can recommend suggestions about how particular blocks can be refactored and can offer you details about the code's complexity.
 - `scripts\run-tests.bat`: This script runs the unit tests for the project.
@@ -90,13 +91,3 @@ Contributions are welcome! Please follow these steps:
 ## License
 
 This project is licensed under the [MIT License](LICENSE).
-
-# TODOs
-
-- [x] Separate BS and Black model in two different files
-- [x] Add tests 
-- [ ] see if it possible to use some fwd_propagation to calculate the greeks of the european
-- [ ] see where it is possible to jit the `simulate_paths` of UnivariateGBM
-- [x] use nox for automation stuff
-- [x] create the package
-- [ ] Add CONTRIBUTING.md
