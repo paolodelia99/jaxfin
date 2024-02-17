@@ -4,7 +4,7 @@ Black Scholes prices for Vanilla European options
 import jax
 import jax.numpy as jnp
 
-from ..common import compute_undiscounted_call_prices
+from ..common import compute_discounted_call_prices
 from ..math import cum_normal, d1, density_normal
 from ..utils import cast_arrays
 
@@ -14,7 +14,7 @@ def bs_price(
     strikes: jax.Array,
     expires: jax.Array,
     vols: jax.Array,
-    discount_rates: jax.Array = None,
+    discount_rates: jax.Array,
     are_calls: jax.Array = None,
     dtype: jnp.dtype = None,
 ) -> jax.Array:
@@ -31,18 +31,13 @@ def bs_price(
     :param dtype: (jnp.dtype): Data type of the output. Defaults to None.
     :return: (jax.Array): Array of computed option prices.
     """
-    shape = spots.shape
-
     [spots, strikes, expires, vols] = cast_arrays(
         [spots, strikes, expires, vols], dtype
     )
 
-    if discount_rates is None:
-        discount_rates = jnp.zeros(shape, dtype=dtype)
+    discount_factors = jnp.exp(-discount_rates * expires)
 
-    discount_factors = jnp.exp(discount_rates * expires)
-
-    calls = compute_undiscounted_call_prices(
+    calls = compute_discounted_call_prices(
         spots, strikes, expires, vols, discount_rates
     )
 

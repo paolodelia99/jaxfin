@@ -13,7 +13,7 @@ def black_price(
     strikes: jax.Array,
     expires: jax.Array,
     vols: jax.Array,
-    discount_rates: jax.Array = None,
+    discount_rates: jax.Array,
     dividend_rates: jax.Array = None,
     are_calls: jax.Array = None,
     dtype: jnp.dtype = None,
@@ -37,9 +37,6 @@ def black_price(
         [spots, strikes, expires, vols], dtype
     )
 
-    if discount_rates is None:
-        discount_rates = jnp.zeros(shape, dtype=dtype)
-
     if dividend_rates is None:
         dividend_rates = jnp.zeros(shape, dtype=dtype)
 
@@ -55,4 +52,4 @@ def black_price(
 
     undiscounted_forwards = forwards - strikes
     undiscouted_puts = undiscounted_calls - undiscounted_forwards
-    return discount_factors * jnp.where(are_calls, undiscounted_calls, undiscouted_puts)
+    return jnp.exp((-1 * discount_rates) * expires) * jnp.where(are_calls, undiscounted_calls, undiscouted_puts)
