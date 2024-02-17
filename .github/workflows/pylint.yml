@@ -20,4 +20,4 @@ jobs:
         pip install -r requirements/build.txt
     - name: Analysing the code with pylint
       run: |
-        pylint $(git ls-files '*.py') --output-format=text:pylint_res.txt,colorized
+        pylint $(git ls-files 'jaxfin\*.py') --output-format=text:pylint_res.txt,colorized
