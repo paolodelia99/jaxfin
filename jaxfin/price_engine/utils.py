@@ -25,7 +25,7 @@ def cast_arrays(array: List[jax.Array], dtype):
 def check_shape(*args):
     """
     Checks if the shapes of the input arrays are the same
-    
+
     :param args: List of arrays
     :return: True if the shapes are the same, False otherwise
     """

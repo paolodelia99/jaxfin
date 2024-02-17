@@ -45,7 +45,7 @@ def cum_normal(x):
 def density_normal(x):
     """
     Normal distribution function
-    
+
     :param x: Input value
     :return: Normal distribution value
     """

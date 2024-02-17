@@ -4,7 +4,8 @@ Common functions for the price_engine submodules
 
 import jax
 import jax.numpy as jnp
-from .math import d1, cum_normal
+
+from .math import cum_normal, d1
 
 
 def _compute_d1_d2(spots, strikes, expires, vols, discount_rates):
@@ -46,7 +47,7 @@ def compute_undiscounted_call_prices(spots, strikes, expires, vols, discount_rat
 def compute_discounted_call_prices(spots, strikes, expires, vols, discount_rates):
     """
     Compute the discounted call option prices
-    
+
     :param spots: Current spot price of the underlying
     :param strikes: Strike price of the option
     :param expires: Time to expiration of the option

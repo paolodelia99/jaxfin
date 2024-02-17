@@ -59,9 +59,7 @@ class UnivGeometricBrownianMotion:
         """
         return self._dtype
 
-    def simulate_paths(
-        self, seed: int, maturity, n: int, n_sim: int
-    ) -> jax.Array:
+    def simulate_paths(self, seed: int, maturity, n: int, n_sim: int) -> jax.Array:
         """
         Simulate a sample of paths from the GBM
 
@@ -75,7 +73,7 @@ class UnivGeometricBrownianMotion:
         dt = maturity / n
 
         Xt = jnp.exp(
-            (self._mean - self._sigma ** 2 / 2) * dt
+            (self._mean - self._sigma**2 / 2) * dt
             + self._sigma * jnp.sqrt(dt) * random.normal(key, shape=(n_sim, n - 1)).T
         )
 
