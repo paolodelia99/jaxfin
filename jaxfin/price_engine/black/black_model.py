@@ -52,4 +52,6 @@ def black_price(
 
     undiscounted_forwards = forwards - strikes
     undiscouted_puts = undiscounted_calls - undiscounted_forwards
-    return jnp.exp((-1 * discount_rates) * expires) * jnp.where(are_calls, undiscounted_calls, undiscouted_puts)
+    return jnp.exp((-1 * discount_rates) * expires) * jnp.where(
+        are_calls, undiscounted_calls, undiscouted_puts
+    )

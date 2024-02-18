@@ -1,5 +1,4 @@
 import jax.numpy as jnp
-from jax import vmap
 
 from jaxfin.price_engine.black_scholes import european_price, delta_european, gamma_european, theta_european, rho_european, vega_european
 
@@ -89,3 +88,83 @@ class TestDelta:
         assert jnp.isclose(call_delta, e_call_delta, atol=TOL).all()
         assert jnp.isclose(put_delta, e_put_delta, atol=TOL).all()
         assert jnp.isclose(call_delta - 1.0, put_delta, atol=TOL).all()
+
+@pytest.mark.parametrize("spot, strike, expire, vol, rate, expected_gamma",
+                            [(100, 120, 1, 0.3, 0.0, 0.01198),
+                            (100, 110, 1, 0.3, 0.0, 0.01311),
+                            (100, 120, 1, 0.2, 0.05, 0.01704),
+                            (80, 150, 0.5, 0.5, 0.02, 0.00409),
+                            (170, 160, 0.25, 0.15, 0.01, 0.02126)
+                            ])
+class TestGamma:
+
+    def test_gamma_bs(self, spot, strike, expire, vol, rate, expected_gamma):
+        spot = jnp.array([spot], dtype=DTYPE)
+        strike = jnp.array([strike], dtype=DTYPE)
+        expire = jnp.array([expire], dtype=DTYPE)
+        vol = jnp.array([vol], dtype=DTYPE)
+        rate = jnp.array([rate], dtype=DTYPE)
+        gamma = gamma_european(spot, strike, expire, vol, rate)
+
+        assert jnp.isclose(gamma, expected_gamma, atol=TOL).all()
+
+@pytest.mark.parametrize("spot, strike, expire, vol, rate, e_call_theta, e_put_theta",
+                            [(100, 120, 1, 0.3, 0.0, 5.38894, 5.38894),
+                            (100, 110, 1, 0.3, 0.0, 5.90058, 5.90058),
+                            (100, 120, 1, 0.2, 0.05, 4.68097, -1.02641),
+                            (80, 150, 0.5, 0.5, 0.02, 3.35533, 0.38519),
+                            (170, 160, 0.25, 0.15, 0.01, 8.17193, 6.57593)
+                            ])
+class TestTheta:
+
+    def test_theta_bs(self, spot, strike, expire, vol, rate, e_call_theta, e_put_theta):
+        spot = jnp.array([spot], dtype=DTYPE)
+        strike = jnp.array([strike], dtype=DTYPE)
+        expire = jnp.array([expire], dtype=DTYPE)
+        vol = jnp.array([vol], dtype=DTYPE)
+        rate = jnp.array([rate], dtype=DTYPE)
+        theta = theta_european(spot, strike, expire, vol, rate)
+
+        assert jnp.isclose(theta, e_call_theta, atol=TOL).all()
+
+@pytest.mark.parametrize("spot, strike, expire, vol, rate, e_call_rho, e_put_rho",
+                            [(100, 120, 1, 0.3, 0.0, 26.91644, -93.08356),
+                            (100, 110, 1, 0.3, 0.0, 35.19993, -74.80007),
+                            (100, 120, 1, 0.2, 0.05, 25.47168, -88.67585),
+                            (80, 150, 0.5, 0.5, 0.02, 2.00656, -72.24718),
+                            (170, 160, 0.25, 0.15, 0.01, 31.49509, -8.40503)
+                            ]) 
+class TestRho:
+
+    def test_rho_bs(self, spot, strike, expire, vol, rate, e_call_rho, e_put_rho):
+        spot = jnp.array([spot], dtype=DTYPE)
+        strike = jnp.array([strike], dtype=DTYPE)
+        expire = jnp.array([expire], dtype=DTYPE)
+        vol = jnp.array([vol], dtype=DTYPE)
+        rate = jnp.array([rate], dtype=DTYPE)
+        put_flag = jnp.array([False], dtype=jnp.bool_)
+        e_call_rho = jnp.array([e_call_rho], dtype=DTYPE)
+        call_rho = rho_european(spot, strike, expire, vol, rate)
+        put_rho = rho_european(spot, strike, expire, vol, rate, are_calls=put_flag)
+
+        assert jnp.isclose(call_rho, e_call_rho, atol=TOL).all()
+        assert jnp.isclose(put_rho, e_put_rho, atol=TOL).all()
+
+@pytest.mark.parametrize("spot, strike, expire, vol, rate, expected_vega",
+                            [(100, 120, 1, 0.3, 0.0, 35.92629),
+                            (100, 110, 1, 0.3, 0.0, 39.33717),
+                            (100, 120, 1, 0.2, 0.05, 34.07384),
+                            (80, 150, 0.5, 0.5, 0.02, 6.55014),
+                            (170, 160, 0.25, 0.15, 0.01, 23.04042)
+                            ])
+class TestVega:
+    
+        def test_vega_bs(self, spot, strike, expire, vol, rate, expected_vega):
+            spot = jnp.array([spot], dtype=DTYPE)
+            strike = jnp.array([strike], dtype=DTYPE)
+            expire = jnp.array([expire], dtype=DTYPE)
+            vol = jnp.array([vol], dtype=DTYPE)
+            rate = jnp.array([rate], dtype=DTYPE)
+            vega = vega_european(spot, strike, expire, vol, rate)
+    
+            assert jnp.isclose(vega, expected_vega, atol=TOL).all()

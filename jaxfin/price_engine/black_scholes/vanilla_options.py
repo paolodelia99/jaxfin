@@ -6,7 +6,6 @@ from jax import grad, vmap
 import jax.numpy as jnp
 
 from ..common import compute_discounted_call_prices
-from ..math import cum_normal, d1, density_normal
 from ..utils import cast_arrays
 
 
@@ -59,7 +58,7 @@ def _delta_vanilla(
     dtype: jnp.dtype = None,
 ) -> jax.Array:
     """
-    Calculate the delta of a call/put option under the BS model
+    Calculate the delta of a call/put option under the BS model (scalar version)
 
     :param spots: (jax.Array): Array of current asset prices.
     :param strikes: (jax.Array): Array of option strike prices.
@@ -70,7 +69,10 @@ def _delta_vanilla(
     :param dtype: (jnp.dtype): Data type of the output. Defaults to None.
     :return: (jax.Array): Array of delta of the given options.
     """
-    return grad(bs_price, argnums=0)(spots, strikes, expires, vols, discount_rates, are_calls, dtype)
+    return grad(bs_price, argnums=0)(
+        spots, strikes, expires, vols, discount_rates, are_calls, dtype
+    )
+
 
 def _gamma_vanilla(
     spots: jax.Array,
@@ -82,7 +84,7 @@ def _gamma_vanilla(
     dtype: jnp.dtype = None,
 ) -> jax.Array:
     """
-    Calculate the gamma of a european option under the BS model
+    Calculate the gamma of a european option under the BS model (scalar version)
 
     :param spots: (jax.Array): Array of current asset prices.
     :param strikes: (jax.Array): Array of option strike prices.
@@ -93,7 +95,10 @@ def _gamma_vanilla(
     :param dtype: (jnp.dtype): Data type of the output. Defaults to None.
     :return: (jax.Array): Array of gamma of the given options.
     """
-    return grad(grad(bs_price, argnums=0), argnums=0)(spots, strikes, expires, vols, discount_rates, are_calls, dtype)
+    return grad(grad(bs_price, argnums=0), argnums=0)(
+        spots, strikes, expires, vols, discount_rates, are_calls, dtype
+    )
+
 
 def _theta_vanilla(
     spots: jax.Array,
@@ -105,7 +110,7 @@ def _theta_vanilla(
     dtype: jnp.dtype = None,
 ) -> jax.Array:
     """
-    Calculate the theta of a european option under the BS model
+    Calculate the theta of a european option under the BS model (scalar version)
 
     :param spots: (jax.Array): Array of current asset prices.
     :param strikes: (jax.Array): Array of option strike prices.
@@ -116,7 +121,10 @@ def _theta_vanilla(
     :param dtype: (jnp.dtype): Data type of the output. Defaults to None.
     :return: (jax.Array): Array of theta of the given options.
     """
-    return grad(bs_price, argnums=2)(spots, strikes, expires, vols, discount_rates, are_calls, dtype)
+    return grad(bs_price, argnums=2)(
+        spots, strikes, expires, vols, discount_rates, are_calls, dtype
+    )
+
 
 def _vega_vanilla(
     spots: jax.Array,
@@ -128,7 +136,7 @@ def _vega_vanilla(
     dtype: jnp.dtype = None,
 ) -> jax.Array:
     """
-    Calculate the vega of a european option under the BS model
+    Calculate the vega of a european option under the BS model (scalar version)
 
     :param spots: (jax.Array): Array of current asset prices.
     :param strikes: (jax.Array): Array of option strike prices.
@@ -139,7 +147,10 @@ def _vega_vanilla(
     :param dtype: (jnp.dtype): Data type of the output. Defaults to None.
     :return: (jax.Array): Array of vega of the given options.
     """
-    return grad(bs_price, argnums=3)(spots, strikes, expires, vols, discount_rates, are_calls, dtype)
+    return grad(bs_price, argnums=3)(
+        spots, strikes, expires, vols, discount_rates, are_calls, dtype
+    )
+
 
 def _rho_vanilla(
     spots: jax.Array,
@@ -151,7 +162,7 @@ def _rho_vanilla(
     dtype: jnp.dtype = None,
 ) -> jax.Array:
     """
-    Calculate the rho of a european option under the BS model
+    Calculate the rho of a european option under the BS model (scalar version)
 
     :param spots: (jax.Array): Array of current asset prices.
     :param strikes: (jax.Array): Array of option strike prices.
@@ -162,12 +173,139 @@ def _rho_vanilla(
     :param dtype: (jnp.dtype): Data type of the output. Defaults to None.
     :return: (jax.Array): Array of rho of the given options.
     """
-    return grad(bs_price, argnums=4)(spots, strikes, expires, vols, discount_rates, are_calls, dtype)
+    return grad(bs_price, argnums=4)(
+        spots, strikes, expires, vols, discount_rates, are_calls, dtype
+    )
+
 
 # Vectorize version of the functions since we are dealing with arrays
 
-delta_vanilla = vmap(_delta_vanilla, in_axes=(0, 0, 0, 0, 0))
-gamma_vanilla = vmap(_gamma_vanilla, in_axes=(0, 0, 0, 0, 0))
-theta_vanilla = vmap(_theta_vanilla, in_axes=(0, 0, 0, 0, 0))
-vega_vanilla = vmap(_vega_vanilla, in_axes=(0, 0, 0, 0, 0))
-rho_vanilla = vmap(_rho_vanilla, in_axes=(0, 0, 0, 0, 0))
+
+def delta_vanilla(
+    spots: jax.Array,
+    strikes: jax.Array,
+    expires: jax.Array,
+    vols: jax.Array,
+    discount_rates: jax.Array,
+    are_calls: jax.Array = None,
+    dtype: jnp.dtype = None,
+) -> jax.Array:
+    """
+    Calculate the delta of a call/put option under the BS model (vectorized)
+
+    :param spots: (jax.Array): Array of current asset prices.
+    :param strikes: (jax.Array): Array of option strike prices.
+    :param expires: (jax.Array): Array of option expiration times.
+    :param vols: (jax.Array): Array of option volatility values.
+    :param discount_rates: (jax.Array): Array of risk-free interest rates.
+    :param are_calls: (jax.Array): Array of booleans indicating whether options are calls (True) or puts (False).
+    :param dtype: (jnp.dtype): Data type of the output. Defaults to None.
+    :return: (jax.Array): Array of delta of the given options.
+    """
+    return vmap(_delta_vanilla, in_axes=(0, 0, 0, 0, 0, 0, None))(
+        spots, strikes, expires, vols, discount_rates, are_calls, dtype
+    )
+
+
+def gamma_vanilla(
+    spots: jax.Array,
+    strikes: jax.Array,
+    expires: jax.Array,
+    vols: jax.Array,
+    discount_rates: jax.Array,
+    are_calls: jax.Array = None,
+    dtype: jnp.dtype = None,
+) -> jax.Array:
+    """
+    Calculate the gamma of a european option under the BS model (vectorized)
+
+    :param spots: (jax.Array): Array of current asset prices.
+    :param strikes: (jax.Array): Array of option strike prices.
+    :param expires: (jax.Array): Array of option expiration times.
+    :param vols: (jax.Array): Array of option volatility values.
+    :param discount_rates: (jax.Array): Array of risk-free interest rates
+    :param are_calls: (jax.Array) Array of booleans indicating whether options are calls (True) or puts (False).
+    :param dtype: (jnp.dtype): Data type of the output. Defaults to None.
+    :return: (jax.Array): Array of gamma of the given options.
+    """
+    return vmap(_gamma_vanilla, in_axes=(0, 0, 0, 0, 0, 0, None))(
+        spots, strikes, expires, vols, discount_rates, are_calls, dtype
+    )
+
+
+def theta_vanilla(
+    spots: jax.Array,
+    strikes: jax.Array,
+    expires: jax.Array,
+    vols: jax.Array,
+    discount_rates: jax.Array,
+    are_calls: jax.Array = None,
+    dtype: jnp.dtype = None,
+) -> jax.Array:
+    """
+    Calculate the theta of a european option under the BS model (vectorized)
+
+    :param spots: (jax.Array): Array of current asset prices.
+    :param strikes: (jax.Array): Array of option strike prices.
+    :param expires: (jax.Array): Array of option expiration times.
+    :param vols: (jax.Array): Array of option volatility values.
+    :param discount_rates: (jax.Array): Array of risk-free interest rates
+    :param are_calls: (jax.Array) Array of booleans indicating whether options are calls (True) or puts (False).
+    :param dtype: (jnp.dtype): Data type of the output. Defaults to None.
+    :return: (jax.Array): Array of theta of the given options.
+    """
+    return vmap(_theta_vanilla, in_axes=(0, 0, 0, 0, 0, 0, None))(
+        spots, strikes, expires, vols, discount_rates, are_calls, dtype
+    )
+
+
+def rho_vanilla(
+    spots: jax.Array,
+    strikes: jax.Array,
+    expires: jax.Array,
+    vols: jax.Array,
+    discount_rates: jax.Array,
+    are_calls: jax.Array = None,
+    dtype: jnp.dtype = None,
+) -> jax.Array:
+    """
+    Calculate the rho of a european option under the BS model (vectorized)
+
+    :param spots: (jax.Array): Array of current asset prices.
+    :param strikes: (jax.Array): Array of option strike prices.
+    :param expires: (jax.Array): Array of option expiration times.
+    :param vols: (jax.Array): Array of option volatility values.
+    :param discount_rates: (jax.Array): Array of risk-free interest rates
+    :param are_calls: (jax.Array) Array of booleans indicating whether options are calls (True) or puts (False).
+    :param dtype: (jnp.dtype): Data type of the output. Defaults to None.
+    :return: (jax.Array): Array of rho of the given options.
+    """
+    return vmap(_rho_vanilla, in_axes=(0, 0, 0, 0, 0, 0, None))(
+        spots, strikes, expires, vols, discount_rates, are_calls, dtype
+    )
+
+
+def vega_vanilla(
+    spots: jax.Array,
+    strikes: jax.Array,
+    expires: jax.Array,
+    vols: jax.Array,
+    discount_rates: jax.Array,
+    are_calls: jax.Array = None,
+    dtype: jnp.dtype = None,
+) -> jax.Array:
+    """
+    Calculate the vega of a european option under the BS model (vectorized)
+
+    :param spots: (jax.Array): Array of current asset prices.
+    :param strikes: (jax.Array): Array of option strike prices.
+    :param expires: (jax.Array): Array of option expiration times.
+    :param vols: (jax.Array): Array of option volatility values.
+    :param discount_rates: (jax.Array): Array of risk-free interest rates
+    :param are_calls: (jax.Array) Array of booleans indicating whether options are calls (True) or puts (False).
+    :param dtype: (jnp.dtype): Data type of the output. Defaults to None.
+    :return: (jax.Array): Array of vega of the given options.
+    """
+    return vmap(_vega_vanilla, in_axes=(0, 0, 0, 0, 0, 0, None))(
+        spots, strikes, expires, vols, discount_rates, are_calls, dtype
+    )
