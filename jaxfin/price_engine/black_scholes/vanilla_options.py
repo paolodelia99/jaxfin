@@ -2,7 +2,7 @@
 Black Scholes prices for Vanilla European options
 """
 import jax
-from jax import grad
+from jax import grad, vmap
 import jax.numpy as jnp
 
 from ..common import compute_discounted_call_prices
@@ -49,7 +49,7 @@ def bs_price(
     return jnp.where(are_calls, calls, puts)
 
 
-def delta_vanilla(
+def _delta_vanilla(
     spots: jax.Array,
     strikes: jax.Array,
     expires: jax.Array,
@@ -72,8 +72,7 @@ def delta_vanilla(
     """
     return grad(bs_price, argnums=0)(spots, strikes, expires, vols, discount_rates, are_calls, dtype)
 
-
-def gamma_vanilla(
+def _gamma_vanilla(
     spots: jax.Array,
     strikes: jax.Array,
     expires: jax.Array,
@@ -96,7 +95,7 @@ def gamma_vanilla(
     """
     return grad(grad(bs_price, argnums=0), argnums=0)(spots, strikes, expires, vols, discount_rates, are_calls, dtype)
 
-def theta_vanilla(
+def _theta_vanilla(
     spots: jax.Array,
     strikes: jax.Array,
     expires: jax.Array,
@@ -119,7 +118,7 @@ def theta_vanilla(
     """
     return grad(bs_price, argnums=2)(spots, strikes, expires, vols, discount_rates, are_calls, dtype)
 
-def vega_vanilla(
+def _vega_vanilla(
     spots: jax.Array,
     strikes: jax.Array,
     expires: jax.Array,
@@ -142,7 +141,7 @@ def vega_vanilla(
     """
     return grad(bs_price, argnums=3)(spots, strikes, expires, vols, discount_rates, are_calls, dtype)
 
-def rho_vanilla(
+def _rho_vanilla(
     spots: jax.Array,
     strikes: jax.Array,
     expires: jax.Array,
@@ -164,3 +163,11 @@ def rho_vanilla(
     :return: (jax.Array): Array of rho of the given options.
     """
     return grad(bs_price, argnums=4)(spots, strikes, expires, vols, discount_rates, are_calls, dtype)
+
+# Vectorize version of the functions since we are dealing with arrays
+
+delta_vanilla = vmap(_delta_vanilla, in_axes=(0, 0, 0, 0, 0))
+gamma_vanilla = vmap(_gamma_vanilla, in_axes=(0, 0, 0, 0, 0))
+theta_vanilla = vmap(_theta_vanilla, in_axes=(0, 0, 0, 0, 0))
+vega_vanilla = vmap(_vega_vanilla, in_axes=(0, 0, 0, 0, 0))
+rho_vanilla = vmap(_rho_vanilla, in_axes=(0, 0, 0, 0, 0))
