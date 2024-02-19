@@ -144,9 +144,14 @@ class TestTheta:
         expire = jnp.array([expire], dtype=DTYPE)
         vol = jnp.array([vol], dtype=DTYPE)
         rate = jnp.array([rate], dtype=DTYPE)
+        put_flag = jnp.array([False], dtype=jnp.bool_)
+        e_call_theta = jnp.array([e_call_theta], dtype=DTYPE)
+        e_put_theta = jnp.array([e_put_theta], dtype=DTYPE)
         theta = theta_european(spot, strike, expire, vol, rate)
+        p_theta = theta_european(spot, strike, expire, vol, rate, are_calls=put_flag)
 
         assert jnp.isclose(theta, e_call_theta, atol=TOL).all()
+        assert jnp.isclose(p_theta, e_put_theta, atol=TOL).all()
 
 @pytest.mark.parametrize("spot, strike, expire, vol, rate, e_call_rho, e_put_rho",
                             [(100, 120, 1, 0.3, 0.0, 26.91644, -93.08356),
