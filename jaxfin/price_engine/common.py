@@ -46,7 +46,7 @@ def compute_undiscounted_call_prices(spots, strikes, expires, vols, discount_rat
 def compute_discounted_call_prices(spots, strikes, expires, vols, discount_rates):
     """
     Compute the discounted call option prices
-    
+
     :param spots: Current spot price of the underlying
     :param strikes: Strike price of the option
     :param expires: Time to expiration of the option
