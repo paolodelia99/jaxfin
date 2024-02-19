@@ -89,6 +89,27 @@ class TestDelta:
         assert jnp.isclose(put_delta, e_put_delta, atol=TOL).all()
         assert jnp.isclose(call_delta - 1.0, put_delta, atol=TOL).all()
 
+
+class TestDeltaBatch:
+
+    def test_delta_bs_batch(self):
+        spots = jnp.array([100, 90, 80, 110, 120], dtype=DTYPE)
+        expires = jnp.array([1.0, 1.0, 1.0, 1.0, 1.0], dtype=DTYPE)
+        vols = jnp.array([.3, .25, .4, .2, .1], dtype=DTYPE)
+        strikes = jnp.array([120, 120, 120, 120, 120], dtype=DTYPE)
+        discount_rates = jnp.array([0.00, 0.00, 0.00, 0.00, 0.00], dtype=DTYPE)
+
+        call_delta = delta_european(spots, strikes, expires, vols, discount_rates)
+        put_flag = jnp.array([False, False, False, False, False], dtype=jnp.bool_)
+        put_delta = delta_european(spots, strikes, expires, vols, discount_rates, are_calls=put_flag)
+
+        expected_call = jnp.array([0.323570, 0.152509, 0.207919, 0.36879, 0.51993])
+        expected_put = jnp.array([-0.676429, -0.847490, -0.79208, -0.63120, -0.480061])
+
+        assert jnp.isclose(call_delta, expected_call, atol=TOL).all()
+        assert jnp.isclose(put_delta, expected_put, atol=TOL).all()
+        assert jnp.isclose(call_delta - 1.0, put_delta, atol=TOL).all()
+
 @pytest.mark.parametrize("spot, strike, expire, vol, rate, expected_gamma",
                             [(100, 120, 1, 0.3, 0.0, 0.01198),
                             (100, 110, 1, 0.3, 0.0, 0.01311),
