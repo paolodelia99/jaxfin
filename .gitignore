@@ -27,6 +27,10 @@ jaxfin/examples/requirements.txt
 test_report.xml
 test_report.html
 
+## Coverage results
+.coverage
+htmlcov/
+
 # Version file
 jaxfin.VERSION
 version.txt
