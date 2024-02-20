@@ -1,7 +1,7 @@
 """Option prices computed with the Black-Scholes module"""
 from jaxfin.price_engine.black_scholes.vanilla_options import (
-    delta_vanilla,
     bs_price,
+    delta_vanilla,
     gamma_vanilla,
 )
 

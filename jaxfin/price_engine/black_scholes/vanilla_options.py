@@ -5,7 +5,7 @@ import jax
 import jax.numpy as jnp
 
 from ..common import compute_undiscounted_call_prices
-from ..math import d1, cum_normal, density_normal
+from ..math import cum_normal, d1, density_normal
 from ..utils import cast_arrays
 
 

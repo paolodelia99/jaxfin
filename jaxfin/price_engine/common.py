@@ -4,7 +4,8 @@ Common functions for the price_engine submodules
 
 import jax
 import jax.numpy as jnp
-from .math import d1, cum_normal
+
+from .math import cum_normal, d1
 
 
 def _compute_d1_d2(spots, strikes, expires, vols, discount_rates):

@@ -2,8 +2,8 @@
 Geometric Brownian motion module
 """
 from jaxfin.models.gbm.gbm import (
-    UnivGeometricBrownianMotion,
     MultiGeometricBrownianMotion,
+    UnivGeometricBrownianMotion,
 )
 
 __all__ = ["UnivGeometricBrownianMotion", "MultiGeometricBrownianMotion"]
