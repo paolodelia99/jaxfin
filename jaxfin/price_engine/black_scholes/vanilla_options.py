@@ -6,7 +6,6 @@ import jax.numpy as jnp
 from jax import grad, vmap
 
 from ..common import compute_discounted_call_prices
-
 from ..utils import cast_arrays
 
 
