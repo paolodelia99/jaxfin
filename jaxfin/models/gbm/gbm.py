@@ -11,15 +11,12 @@ class UnivGeometricBrownianMotion:
     Represent a 1-dimensional GBM
 
     # Example usage:
-    params = {
-        's0' : 10,
-        'dtype' : jnp.float32,
-        'mean' : 0.1,
-        'sigma': 0.3
-    }
+    s0 = jnp.array([100], dtype=jnp.float32)
+    mean = jnp.array([0.1], dtype=jnp.float32)
+    sigma = jnp.array([0.3], dtype=jnp.float32)
 
-    gmb_process = GeometricBrownianMotion(**params)
-    paths = gmb_process.simulate_paths(maturity=1.0, n=100, n_sim=100)
+    gbm_process = UnivGeometricBrownianMotion(s0, mean, sigma, dtype=jnp.float32)
+    paths = gbm_process.simulate_paths(maturity=1.0, n=100, n_sim=100)
     """
 
     def __init__(self, s0, mean, sigma, dtype):
@@ -89,18 +86,16 @@ class MultiGeometricBrownianMotion:
     Represent a d-dimensional GBM
 
     # Example usage:
-    params = {
-        's0' : [10, 12],
-        'dtype' : jnp.float32,
-        'mean' : 0.1,
-        'cov':  [[0.3, 0.1], [0.1, 0.5]]
-    }
+    s0 = jnp.array([100, 100], dtype=jnp.float32)
+    mean = jnp.array([0.1, 0.1], dtype=jnp.float32)
+    sigma = jnp.array([0.3, 0.3], dtype=jnp.float32)
+    corr = jnp.array([[1.0, 0.5], [0.5, 1.0]], dtype=jnp.float32)
 
-    gmb_process = GeometricBrownianMotion(**params)
+    m_gbm = MultiGeometricBrownianMotion(s0, mean, sigma, corr, jnp.float32)
     paths = gmb_process.simulate_paths(maturity=1.0, n=100, n_sim=100)
     """
 
-    def __init__(self, s0, mean, sigma, corr, dtype):
+    def __init__(self, s0, mean, sigma, corr, dtype=jnp.float32):
         if dtype is None:
             raise ValueError("dtype must not be None")
 
