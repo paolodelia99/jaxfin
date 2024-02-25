@@ -7,6 +7,16 @@ from jaxfin.price_engine.black import future_option_price, future_option_delta, 
 TOL = 1e-3
 DTYPE = jnp.float32
 
+def test_one_future_option_float():
+    spot = jnp.array(100, dtype=DTYPE)
+    expire = jnp.array(1.0, dtype=DTYPE)
+    vol = jnp.array(0.3, dtype=DTYPE)
+    strike = jnp.array(110, dtype=DTYPE)
+    risk_free_rate = jnp.array(0.0, dtype=DTYPE)
+
+    price = future_option_price(spot, strike, expire, vol, risk_free_rate, dtype=DTYPE)
+
+    assert price == 8.141014
 
 def test_one_future_option():
     spot = jnp.array([100], dtype=DTYPE)
@@ -63,29 +73,39 @@ def test_foption_batch_mixed_disc():
 
     assert jnp.isclose(prices, expected, atol=TOL).all()
 
-@pytest.mark.parametrize("spot, strike, expire, vol, rate, e_call_delta, e_put_delta",
-                         [(100, 120, 1, 0.3, 0.0, 0.32357, -0.67643),
-                          (100, 110, 1, 0.3, 0.0, 0.43341, -0.56659),
-                          (100, 120, 1, 0.2, 0.05, 0.30971, -0.71975),
-                          (80, 150, 0.5, 0.5, 0.02, 0.05894, -0.94222),
-                          (170, 160, 0.25, 0.15, 0.01, 0.81452, -0.18953)
-                        ])
 class TestDelta:
 
-    def test_delta_bs(self, spot, strike, expire, vol, rate, e_call_delta, e_put_delta):
-        spot = jnp.array([spot], dtype=DTYPE)
-        strike = jnp.array([strike], dtype=DTYPE)
-        expire = jnp.array([expire], dtype=DTYPE)
-        vol = jnp.array([vol], dtype=DTYPE)
-        rate = jnp.array([rate], dtype=DTYPE)
-        dividends = jnp.array([0.0], dtype=DTYPE)
-        put_flag = jnp.array([False], dtype=jnp.bool_)
-        e_call_delta = jnp.array([e_call_delta], dtype=DTYPE)
-        call_delta = future_option_delta(spot, strike, expire, vol, rate, dividends)
-        put_delta = future_option_delta(spot, strike, expire, vol, rate, dividends, are_calls=put_flag)
+    def test_delta_bs_float(self):
+        spot = jnp.array(100, dtype=DTYPE)
+        strike = jnp.array(120, dtype=DTYPE)
+        expire = jnp.array(1, dtype=DTYPE)
+        vol = jnp.array(0.3, dtype=DTYPE)
+        rate = jnp.array(0.0, dtype=DTYPE)
+        expected_delta = jnp.array(0.32357, dtype=DTYPE)
+        expected_put_delta = jnp.array(-0.67643, dtype=DTYPE)
 
-        assert jnp.isclose(call_delta, e_call_delta, atol=TOL).all()
-        assert jnp.isclose(put_delta, e_put_delta, atol=TOL).all()
+        call_delta = future_option_delta(spot, strike, expire, vol, rate)
+        put_delta = future_option_delta(spot, strike, expire, vol, rate, are_calls=False)
+
+        assert jnp.isclose(call_delta, expected_delta, atol=TOL)
+        assert jnp.isclose(put_delta, expected_put_delta, atol=TOL)
+
+    def test_delta_bs(self):
+        spots = jnp.array([100, 100, 100, 80, 170], dtype=DTYPE)
+        strikes = jnp.array([120, 110, 120, 150, 160], dtype=DTYPE)
+        expires = jnp.array([1, 1, 1, 0.5, 0.25], dtype=DTYPE)
+        vols = jnp.array([0.3, 0.3, 0.2, 0.5, 0.15], dtype=DTYPE)
+        rates = jnp.array([0.0, 0.0, 0.05, 0.02, 0.01], dtype=DTYPE)
+        dividends = jnp.array([0.0, 0.0, 0.0, 0.0, 0.0], dtype=DTYPE)
+        put_flags = jnp.array([False, False, False, False, False], dtype=jnp.bool_)
+        e_call_deltas = jnp.array([0.32357, 0.43341, 0.30971, 0.05894, 0.81452], dtype=DTYPE)
+        e_put_deltas = jnp.array([-0.67643, -0.56659, -0.71975, -0.94222, -0.18953], dtype=DTYPE)
+
+        call_deltas = future_option_delta(spots, strikes, expires, vols, rates, dividends)
+        put_deltas = future_option_delta(spots, strikes, expires, vols, rates, dividends, are_calls=put_flags)
+
+        assert jnp.allclose(call_deltas, e_call_deltas, atol=TOL)
+        assert jnp.allclose(put_deltas, e_put_deltas, atol=TOL)
 
 
 @pytest.mark.parametrize("spot, strike, expire, vol, rate, expected_gamma",

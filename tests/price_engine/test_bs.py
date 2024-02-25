@@ -2,11 +2,14 @@ import jax.numpy as jnp
 
 from jaxfin.price_engine.black_scholes import european_price, delta_european, gamma_european, theta_european, rho_european, vega_european
 
+import logging
+
 import pytest
 
 TOL = 1e-3
 DTYPE = jnp.float32
 
+logging.basicConfig(level=logging.INFO)
 
 def test_one_vanilla():
     dtype = jnp.float32
@@ -90,7 +93,26 @@ class TestDelta:
         assert jnp.isclose(call_delta - 1.0, put_delta, atol=TOL).all()
 
 
+
 class TestDeltaBatch:
+
+    def test_delta_bs_scalar(self):
+        spot = jnp.array(100, dtype=DTYPE)
+        strike = jnp.array(120, dtype=DTYPE)
+        expire = jnp.array(1, dtype=DTYPE)
+        vol = jnp.array(0.3, dtype=DTYPE)
+        rate = jnp.array(0.0, dtype=DTYPE)
+        expected_delta = jnp.array(0.32357, dtype=DTYPE)
+        expected_put_delta = jnp.array(-0.67643, dtype=DTYPE)
+
+        logging.info(f"Testing with spot={spot}, strike={strike}, expire={expire}, vol={vol}, rate={rate}")
+
+        call_delta = delta_european(spot, strike, expire, vol, rate)
+        put_delta = delta_european(spot, strike, expire, vol, rate, are_calls=False)
+
+        assert jnp.isclose(call_delta, expected_delta, atol=TOL)
+        assert jnp.isclose(put_delta, expected_put_delta, atol=TOL)
+        assert jnp.isclose(call_delta - 1.0, put_delta, atol=TOL)
 
     def test_delta_bs_batch(self):
         spots = jnp.array([100, 90, 80, 110, 120], dtype=DTYPE)
@@ -98,6 +120,8 @@ class TestDeltaBatch:
         vols = jnp.array([.3, .25, .4, .2, .1], dtype=DTYPE)
         strikes = jnp.array([120, 120, 120, 120, 120], dtype=DTYPE)
         discount_rates = jnp.array([0.00, 0.00, 0.00, 0.00, 0.00], dtype=DTYPE)
+
+        logging.info(f"Testing with spots={spots}, strikes={strikes}, expires={expires}, vols={vols}, rates={discount_rates}")
 
         call_delta = delta_european(spots, strikes, expires, vols, discount_rates)
         put_flag = jnp.array([False, False, False, False, False], dtype=jnp.bool_)
@@ -128,6 +152,19 @@ class TestGamma:
         gamma = gamma_european(spot, strike, expire, vol, rate)
 
         assert jnp.isclose(gamma, expected_gamma, atol=TOL).all()
+
+class TestGammaBatch:
+
+    def test_gamma_bs_vectorized(self):
+        spots = jnp.array([100, 100, 100, 80, 170], dtype=DTYPE)
+        strikes = jnp.array([120, 110, 120, 150, 160], dtype=DTYPE)
+        expires = jnp.array([1, 1, 1, 0.5, 0.25], dtype=DTYPE)
+        vols = jnp.array([0.3, 0.3, 0.2, 0.5, 0.15], dtype=DTYPE)
+        rates = jnp.array([0.0, 0.0, 0.05, 0.02, 0.01], dtype=DTYPE)
+        expected_gammas = jnp.array([0.01198, 0.01311, 0.01704, 0.00409, 0.02126], dtype=DTYPE)
+        gammas = gamma_european(spots, strikes, expires, vols, rates)
+
+        assert jnp.allclose(gammas, expected_gammas, atol=TOL)
 
 @pytest.mark.parametrize("spot, strike, expire, vol, rate, e_call_theta, e_put_theta",
                             [(100, 120, 1, 0.3, 0.0, 5.38894, 5.38894),
