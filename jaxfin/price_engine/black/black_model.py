@@ -5,7 +5,7 @@ from typing import Union
 
 import jax
 import jax.numpy as jnp
-from jax import grad, vmap
+from jax import grad, jit, vmap
 
 from ..common import compute_undiscounted_call_prices
 from ..utils import cast_arrays
@@ -60,6 +60,7 @@ def black_price(
     )
 
 
+@jit
 def _delta_black(
     spots: jax.Array,
     strikes: jax.Array,
@@ -88,6 +89,7 @@ def _delta_black(
     )
 
 
+@jit
 def _gamma_black(
     spots: jax.Array,
     strikes: jax.Array,
@@ -135,7 +137,7 @@ def delta_black(
     :param vols: (Union[jax.Array, float]): Option volatility value or array of values.
     :param discount_rates: (Union[jax.Array, float]): Risk-free interest rate or array of rates.
     :param dividend_rates: (Union[jax.Array, float]): Dividend rate or array of rates. Defaults to None.
-    :param are_calls: (Union[jax.Array, bool]): Boolean indicating whether option is a 
+    :param are_calls: (Union[jax.Array, bool]): Boolean indicating whether option is a
                                                 call or put, or array of booleans.
     :param dtype: (jnp.dtype): Data type of the output. Defaults to None.
     :return: (Union[jax.Array, float]): Delta of the given option or array of deltas.
@@ -152,7 +154,7 @@ def delta_black(
             dtype,
         )
 
-    return vmap(_delta_black, in_axes=(0, 0, 0, 0, 0, 0, 0, None))(
+    return jit(vmap(_delta_black, in_axes=(0, 0, 0, 0, 0, 0, 0, None)))(
         spots,
         strikes,
         expires,
@@ -183,7 +185,7 @@ def gamma_black(
     :param vols: (Union[jax.Array, float]): Option volatility value or array of values.
     :param discount_rates: (Union[jax.Array, float]): Risk-free interest rate or array of rates.
     :param dividend_rates: (Union[jax.Array, float]): Dividend rate or array of rates. Defaults to None.
-    :param are_calls: (Union[jax.Array, bool]): Boolean indicating whether option is a 
+    :param are_calls: (Union[jax.Array, bool]): Boolean indicating whether option is a
                                                 call or put, or array of booleans.
     :param dtype: (jnp.dtype): Data type of the output. Defaults to None.
     :return: (Union[jax.Array, float]): Gamma of the given option or array of gammas.
@@ -200,7 +202,7 @@ def gamma_black(
             dtype,
         )
 
-    return vmap(_gamma_black, in_axes=(0, 0, 0, 0, 0, 0, 0, None))(
+    return jit(vmap(_gamma_black, in_axes=(0, 0, 0, 0, 0, 0, 0, None)))(
         spots,
         strikes,
         expires,

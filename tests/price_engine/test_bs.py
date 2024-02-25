@@ -153,6 +153,19 @@ class TestGamma:
 
         assert jnp.isclose(gamma, expected_gamma, atol=TOL).all()
 
+class TestGammaBatch:
+
+    def test_gamma_bs_vectorized(self):
+        spots = jnp.array([100, 100, 100, 80, 170], dtype=DTYPE)
+        strikes = jnp.array([120, 110, 120, 150, 160], dtype=DTYPE)
+        expires = jnp.array([1, 1, 1, 0.5, 0.25], dtype=DTYPE)
+        vols = jnp.array([0.3, 0.3, 0.2, 0.5, 0.15], dtype=DTYPE)
+        rates = jnp.array([0.0, 0.0, 0.05, 0.02, 0.01], dtype=DTYPE)
+        expected_gammas = jnp.array([0.01198, 0.01311, 0.01704, 0.00409, 0.02126], dtype=DTYPE)
+        gammas = gamma_european(spots, strikes, expires, vols, rates)
+
+        assert jnp.allclose(gammas, expected_gammas, atol=TOL)
+
 @pytest.mark.parametrize("spot, strike, expire, vol, rate, e_call_theta, e_put_theta",
                             [(100, 120, 1, 0.3, 0.0, 5.38894, 5.38894),
                             (100, 110, 1, 0.3, 0.0, 5.90058, 5.90058),

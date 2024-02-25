@@ -5,7 +5,7 @@ from typing import Union
 
 import jax
 import jax.numpy as jnp
-from jax import grad, vmap
+from jax import grad, jit, vmap
 
 from ..common import compute_discounted_call_prices
 from ..utils import cast_arrays
@@ -50,6 +50,7 @@ def bs_price(
     return jnp.where(are_calls, calls, puts)
 
 
+@jit
 def _delta_vanilla(
     spots: jax.Array,
     strikes: jax.Array,
@@ -77,6 +78,7 @@ def _delta_vanilla(
     )
 
 
+@jit
 def _gamma_vanilla(
     spots: jax.Array,
     strikes: jax.Array,
@@ -104,6 +106,7 @@ def _gamma_vanilla(
     )
 
 
+@jit
 def _theta_vanilla(
     spots: jax.Array,
     strikes: jax.Array,
@@ -131,6 +134,7 @@ def _theta_vanilla(
     )
 
 
+@jit
 def _vega_vanilla(
     spots: jax.Array,
     strikes: jax.Array,
@@ -158,6 +162,7 @@ def _vega_vanilla(
     )
 
 
+@jit
 def _rho_vanilla(
     spots: jax.Array,
     strikes: jax.Array,
@@ -215,7 +220,7 @@ def delta_vanilla(
             spots, strikes, expires, vols, discount_rates, are_calls, dtype
         )
 
-    return vmap(_delta_vanilla, in_axes=(0, 0, 0, 0, 0, 0, None))(
+    return jit(vmap(_delta_vanilla, in_axes=(0, 0, 0, 0, 0, 0, None)))(
         spots, strikes, expires, vols, discount_rates, are_calls, dtype
     )
 
@@ -247,7 +252,7 @@ def gamma_vanilla(
             spots, strikes, expires, vols, discount_rates, are_calls, dtype
         )
 
-    return vmap(_gamma_vanilla, in_axes=(0, 0, 0, 0, 0, 0, None))(
+    return jit(vmap(_gamma_vanilla, in_axes=(0, 0, 0, 0, 0, 0, None)))(
         spots, strikes, expires, vols, discount_rates, are_calls, dtype
     )
 
@@ -279,7 +284,7 @@ def theta_vanilla(
             spots, strikes, expires, vols, discount_rates, are_calls, dtype
         )
 
-    return vmap(_theta_vanilla, in_axes=(0, 0, 0, 0, 0, 0, None))(
+    return jit(vmap(_theta_vanilla, in_axes=(0, 0, 0, 0, 0, 0, None)))(
         spots, strikes, expires, vols, discount_rates, are_calls, dtype
     )
 
@@ -311,7 +316,7 @@ def rho_vanilla(
             spots, strikes, expires, vols, discount_rates, are_calls, dtype
         )
 
-    return vmap(_rho_vanilla, in_axes=(0, 0, 0, 0, 0, 0, None))(
+    return jit(vmap(_rho_vanilla, in_axes=(0, 0, 0, 0, 0, 0, None)))(
         spots, strikes, expires, vols, discount_rates, are_calls, dtype
     )
 
@@ -343,6 +348,6 @@ def vega_vanilla(
             spots, strikes, expires, vols, discount_rates, are_calls, dtype
         )
 
-    return vmap(_vega_vanilla, in_axes=(0, 0, 0, 0, 0, 0, None))(
+    return jit(vmap(_vega_vanilla, in_axes=(0, 0, 0, 0, 0, 0, None)))(
         spots, strikes, expires, vols, discount_rates, are_calls, dtype
     )
