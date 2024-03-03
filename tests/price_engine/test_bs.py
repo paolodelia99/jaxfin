@@ -1,6 +1,6 @@
 import jax.numpy as jnp
 
-from jaxfin.price_engine.black_scholes import european_price, delta_european, gamma_european, theta_european, rho_european, vega_european
+from jaxfin.price_engine.black_scholes import european_price, delta_european, gamma_european, theta_european, rho_european, vega_european, get_vfunction
 
 import logging
 
@@ -78,13 +78,13 @@ def test_vanilla_batch_mixed_disc():
 class TestDelta:
 
     def test_delta_bs(self, spot, strike, expire, vol, rate, e_call_delta, e_put_delta):
-        spot = jnp.array([spot], dtype=DTYPE)
-        strike = jnp.array([strike], dtype=DTYPE)
-        expire = jnp.array([expire], dtype=DTYPE)
-        vol = jnp.array([vol], dtype=DTYPE)
-        rate = jnp.array([rate], dtype=DTYPE)
-        put_flag = jnp.array([False], dtype=jnp.bool_)
-        e_call_delta = jnp.array([e_call_delta], dtype=DTYPE)
+        spot = jnp.array(spot, dtype=DTYPE)
+        strike = jnp.array(strike, dtype=DTYPE)
+        expire = jnp.array(expire, dtype=DTYPE)
+        vol = jnp.array(vol, dtype=DTYPE)
+        rate = jnp.array(rate, dtype=DTYPE)
+        put_flag = jnp.array(False, dtype=jnp.bool_)
+        e_call_delta = jnp.array(e_call_delta, dtype=DTYPE)
         call_delta = delta_european(spot, strike, expire, vol, rate)
         put_delta = delta_european(spot, strike, expire, vol, rate, are_calls=put_flag)
 
@@ -120,12 +120,15 @@ class TestDeltaBatch:
         vols = jnp.array([.3, .25, .4, .2, .1], dtype=DTYPE)
         strikes = jnp.array([120, 120, 120, 120, 120], dtype=DTYPE)
         discount_rates = jnp.array([0.00, 0.00, 0.00, 0.00, 0.00], dtype=DTYPE)
+        call_flag = jnp.array([True, True, True, True, True], dtype=jnp.bool_)
+
+        vmap_delta = get_vfunction(delta_european, spots, strikes, expires, vols, discount_rates, call_flag)
 
         logging.info(f"Testing with spots={spots}, strikes={strikes}, expires={expires}, vols={vols}, rates={discount_rates}")
 
-        call_delta = delta_european(spots, strikes, expires, vols, discount_rates)
+        call_delta = vmap_delta(spots, strikes, expires, vols, discount_rates, call_flag)
         put_flag = jnp.array([False, False, False, False, False], dtype=jnp.bool_)
-        put_delta = delta_european(spots, strikes, expires, vols, discount_rates, are_calls=put_flag)
+        put_delta = vmap_delta(spots, strikes, expires, vols, discount_rates, put_flag)
 
         expected_call = jnp.array([0.323570, 0.152509, 0.207919, 0.36879, 0.51993])
         expected_put = jnp.array([-0.676429, -0.847490, -0.79208, -0.63120, -0.480061])
@@ -144,11 +147,11 @@ class TestDeltaBatch:
 class TestGamma:
 
     def test_gamma_bs(self, spot, strike, expire, vol, rate, expected_gamma):
-        spot = jnp.array([spot], dtype=DTYPE)
-        strike = jnp.array([strike], dtype=DTYPE)
-        expire = jnp.array([expire], dtype=DTYPE)
-        vol = jnp.array([vol], dtype=DTYPE)
-        rate = jnp.array([rate], dtype=DTYPE)
+        spot = jnp.array(spot, dtype=DTYPE)
+        strike = jnp.array(strike, dtype=DTYPE)
+        expire = jnp.array(expire, dtype=DTYPE)
+        vol = jnp.array(vol, dtype=DTYPE)
+        rate = jnp.array(rate, dtype=DTYPE)
         gamma = gamma_european(spot, strike, expire, vol, rate)
 
         assert jnp.isclose(gamma, expected_gamma, atol=TOL).all()
@@ -162,7 +165,9 @@ class TestGammaBatch:
         vols = jnp.array([0.3, 0.3, 0.2, 0.5, 0.15], dtype=DTYPE)
         rates = jnp.array([0.0, 0.0, 0.05, 0.02, 0.01], dtype=DTYPE)
         expected_gammas = jnp.array([0.01198, 0.01311, 0.01704, 0.00409, 0.02126], dtype=DTYPE)
-        gammas = gamma_european(spots, strikes, expires, vols, rates)
+        vmap_gamma = get_vfunction(gamma_european, spots, strikes, expires, vols, rates)
+
+        gammas = vmap_gamma(spots, strikes, expires, vols, rates)
 
         assert jnp.allclose(gammas, expected_gammas, atol=TOL)
 
@@ -176,14 +181,14 @@ class TestGammaBatch:
 class TestTheta:
 
     def test_theta_bs(self, spot, strike, expire, vol, rate, e_call_theta, e_put_theta):
-        spot = jnp.array([spot], dtype=DTYPE)
-        strike = jnp.array([strike], dtype=DTYPE)
-        expire = jnp.array([expire], dtype=DTYPE)
-        vol = jnp.array([vol], dtype=DTYPE)
-        rate = jnp.array([rate], dtype=DTYPE)
-        put_flag = jnp.array([False], dtype=jnp.bool_)
-        e_call_theta = jnp.array([e_call_theta], dtype=DTYPE)
-        e_put_theta = jnp.array([e_put_theta], dtype=DTYPE)
+        spot = jnp.array(spot, dtype=DTYPE)
+        strike = jnp.array(strike, dtype=DTYPE)
+        expire = jnp.array(expire, dtype=DTYPE)
+        vol = jnp.array(vol, dtype=DTYPE)
+        rate = jnp.array(rate, dtype=DTYPE)
+        put_flag = jnp.array(False, dtype=jnp.bool_)
+        e_call_theta = jnp.array(e_call_theta, dtype=DTYPE)
+        e_put_theta = jnp.array(e_put_theta, dtype=DTYPE)
         theta = theta_european(spot, strike, expire, vol, rate)
         p_theta = theta_european(spot, strike, expire, vol, rate, are_calls=put_flag)
 
@@ -200,13 +205,13 @@ class TestTheta:
 class TestRho:
 
     def test_rho_bs(self, spot, strike, expire, vol, rate, e_call_rho, e_put_rho):
-        spot = jnp.array([spot], dtype=DTYPE)
-        strike = jnp.array([strike], dtype=DTYPE)
-        expire = jnp.array([expire], dtype=DTYPE)
-        vol = jnp.array([vol], dtype=DTYPE)
-        rate = jnp.array([rate], dtype=DTYPE)
-        put_flag = jnp.array([False], dtype=jnp.bool_)
-        e_call_rho = jnp.array([e_call_rho], dtype=DTYPE)
+        spot = jnp.array(spot, dtype=DTYPE)
+        strike = jnp.array(strike, dtype=DTYPE)
+        expire = jnp.array(expire, dtype=DTYPE)
+        vol = jnp.array(vol, dtype=DTYPE)
+        rate = jnp.array(rate, dtype=DTYPE)
+        put_flag = jnp.array(False, dtype=jnp.bool_)
+        e_call_rho = jnp.array(e_call_rho, dtype=DTYPE)
         call_rho = rho_european(spot, strike, expire, vol, rate)
         put_rho = rho_european(spot, strike, expire, vol, rate, are_calls=put_flag)
 
@@ -223,11 +228,11 @@ class TestRho:
 class TestVega:
     
         def test_vega_bs(self, spot, strike, expire, vol, rate, expected_vega):
-            spot = jnp.array([spot], dtype=DTYPE)
-            strike = jnp.array([strike], dtype=DTYPE)
-            expire = jnp.array([expire], dtype=DTYPE)
-            vol = jnp.array([vol], dtype=DTYPE)
-            rate = jnp.array([rate], dtype=DTYPE)
+            spot = jnp.array(spot, dtype=DTYPE)
+            strike = jnp.array(strike, dtype=DTYPE)
+            expire = jnp.array(expire, dtype=DTYPE)
+            vol = jnp.array(vol, dtype=DTYPE)
+            rate = jnp.array(rate, dtype=DTYPE)
             vega = vega_european(spot, strike, expire, vol, rate)
     
             assert jnp.isclose(vega, expected_vega, atol=TOL).all()
