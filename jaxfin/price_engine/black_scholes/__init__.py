@@ -6,7 +6,6 @@ from jaxfin.price_engine.black_scholes.vanilla_options import (
     rho_vanilla,
     theta_vanilla,
     vega_vanilla,
-    get_vfunction,
 )
 
 european_price = bs_price

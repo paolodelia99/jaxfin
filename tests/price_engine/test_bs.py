@@ -1,6 +1,7 @@
 import jax.numpy as jnp
 
-from jaxfin.price_engine.black_scholes import european_price, delta_european, gamma_european, theta_european, rho_european, vega_european, get_vfunction
+from jaxfin.price_engine.black_scholes import european_price, delta_european, gamma_european, theta_european, rho_european, vega_european
+from jaxfin.price_engine.utils.vect import get_vfunction
 
 import logging
 
