@@ -9,6 +9,7 @@ jax==0.4.23
 jaxlib==0.4.23
 mccabe==0.7.0
 ml-dtypes==0.3.1
+mypy==1.8.0
 mypy-extensions==1.0.0
 numpy==1.26.2
 nox==2023.4.22
