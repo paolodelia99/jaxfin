@@ -1,14 +1,14 @@
 """
 Black Scholes prices for Vanilla European options
 """
-from typing import Callable, Optional, Union, Tuple, TypeVar
+from typing import Callable, Optional, Union, TypeVar
 
 import jax
 import jax.numpy as jnp
-from jax import grad, jit, vmap
+from jax import grad, jit
 
-from ..common import compute_discounted_call_prices
-from ..utils import cast_arrays
+from ..math.bs_common import compute_discounted_call_prices
+from ..utils.arrays import cast_arrays
 
 
 F = TypeVar("F", bound=Callable)
@@ -191,57 +191,3 @@ def rho_vanilla(
     return grad(bs_price, argnums=4)(
         spots, strikes, expires, vols, discount_rates, are_calls, dtype
     )
-
-
-# Vectorize version of the functions since we are dealing with arrays
-
-
-def get_vfunction(
-    fun: F, 
-    spots: Union[jax.Array, float], 
-    strikes: Union[jax.Array, float], 
-    expires: Union[jax.Array, float], 
-    vols: Union[jax.Array, float], 
-    discount_rates: Union[jax.Array, float], 
-    are_calls: Optional[Union[jax.Array, bool]] = None,
-    dtype: Optional[jnp.dtype] = None
-):
-    """
-    Get the vectorized version of a given function.
-
-    :param fun: (Callable): Function to vectorize.
-    :return: (Callable) Vectorized function.
-    """
-    return jit(
-        vmap(
-            fun,
-            in_axes=_get_vmap_mask(
-                spots, strikes, expires, vols, discount_rates, are_calls, dtype
-            ),
-        )
-    )
-
-
-def _get_vmap_mask(
-    spots: Union[jax.Array, float], 
-    strikes: Union[jax.Array, float],
-    expires: Union[jax.Array, float], 
-    vols: Union[jax.Array, float], 
-    discount_rates: Union[jax.Array, float],
-    are_calls: Optional[Union[jax.Array, bool]] = None, 
-    dtype: Union[jnp.dtype, None] = None
-) -> Tuple[Union[None, int], ...]:
-    mask = tuple(
-        map(
-            lambda x: None if jnp.isscalar(x) else 0,
-            [spots, strikes, expires, vols, discount_rates],
-        )
-    )
-
-    if are_calls is not None:
-        mask += (0,)
-
-        if dtype is not None:
-            mask += (None,)
-
-    return mask
