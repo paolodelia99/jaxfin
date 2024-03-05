@@ -22,19 +22,22 @@ def get_vfunction(
     dtype: Optional[jnp.dtype] = None,
 ):
     """
-    Return a vectorized function for the black-scholes realted functions
+    Returns a vectorized function for the Black-Scholes related functions.
 
-    :param fun: (Callable): Function to vectorize.
-    :param spots: (Union[jax.Array, float]): Current asset price or array of prices.
-    :param strikes: (Union[jax.Array, float]): Option strike price or array of prices.
-    :param expires: (Union[jax.Array, float]): Option expiration time or array of times.
-    :param vols: (Union[jax.Array, float]): Option volatility value or array of values.
-    :param discount_rates: (Union[jax.Array, float]): Risk-free interest rate or array of rates.
-    :param dividend_rates: (Union[jax.Array, float]): Dividend rate or array of rates. Defaults to None.
-    :param are_calls: (Union[jax.Array, bool]): Boolean indicating whether option is a
-                                                call or put, or array of booleans. Defaults to None.
-    :param dtype: (jnp.dtype): Data type of the output. Defaults to None.
-    :return: (Callable) Vectorized function.
+    Args:
+        fun (Callable): Function to vectorize.
+        spots (Union[jax.Array, float]): Current asset price or array of prices.
+        strikes (Union[jax.Array, float]): Option strike price or array of prices.
+        expires (Union[jax.Array, float]): Option expiration time or array of times.
+        vols (Union[jax.Array, float]): Option volatility value or array of values.
+        discount_rates (Union[jax.Array, float]): Risk-free interest rate or array of rates.
+        dividend_rates (Union[jax.Array, float], optional): Dividend rate or array of rates. Defaults to None.
+        are_calls (Union[jax.Array, bool], optional): Boolean indicating whether option is a
+                                                      call or put, or array of booleans. Defaults to None.
+        dtype (jnp.dtype, optional): Data type of the output. Defaults to None.
+
+    Returns:
+        Vectorized function.
     """
     return jit(
         vmap(

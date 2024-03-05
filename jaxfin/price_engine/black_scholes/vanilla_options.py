@@ -26,15 +26,18 @@ def bs_price(
     """
     Compute the option prices for european options using the Black-Scholes model.
 
-    :param spots: (jax.Array): Array of current asset prices.
-    :param strikes: (jax.Array): Array of option strike prices.
-    :param expires: (jax.Array): Array of option expiration times.
-    :param vols: (jax.Array): Array of option volatility values.
-    :param discount_rates: (jax.Array): Array of risk-free interest rates. Defaults to None.
-    :param dividend_rates: (jax.Array): Array of dividend rates. Defaults to None.
-    :param are_calls: (jax.Array): Array of booleans indicating whether options are calls (True) or puts (False).
-    :param dtype: (jnp.dtype): Data type of the output. Defaults to None.
-    :return: (jax.Array): Array of computed option prices.
+    Args:
+        spots (jax.Array): Array of current asset prices.
+        strikes (jax.Array): Array of option strike prices.
+        expires (jax.Array): Array of option expiration times.
+        vols (jax.Array): Array of option volatility values.
+        discount_rates (jax.Array): Array of risk-free interest rates. Defaults to None.
+        dividend_rates (jax.Array, optional): Array of dividend rates. Defaults to None.
+        are_calls (jax.Array): Array of booleans indicating whether options are calls (True) or puts (False).
+        dtype (jnp.dtype, optional): Data type of the output. Defaults to None.
+
+    Returns:
+        jax.Array: Array of computed option prices.
     """
     [spots, strikes, expires, vols] = cast_arrays(
         [spots, strikes, expires, vols], dtype
