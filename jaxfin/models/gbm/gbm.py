@@ -1,4 +1,6 @@
 """Geometric Brownian Motion class implementation"""
+from typing import Union, Optional, List
+
 import jax
 import jax.numpy as jnp
 from jax import random
@@ -19,7 +21,21 @@ class UnivGeometricBrownianMotion:
     paths = gbm_process.simulate_paths(maturity=1.0, n=100, n_sim=100)
     """
 
-    def __init__(self, s0, mean, sigma, dtype):
+    def __init__(
+        self,
+        s0: Union[jax.Array, float],
+        mean: Union[jax.Array, float],
+        sigma: Union[jax.Array, float],
+        dtype: Optional[jax.numpy.dtype] = jnp.float32,
+    ):
+        """
+        GBM constructor
+
+        :param s0: (Union[jax.Array, float]): Initial value of the GBM
+        :param mean: (Union[jax.Array, float]): Mean of the GBM
+        :param sigma: (Union[jax.Array, float]): Standard deviation of the GBM
+        :param dtype: (Optional[jax.numpy.dtype]): Underlying dtype of the GBM
+        """
         if dtype is None:
             raise ValueError("dtype must not be None")
 
@@ -29,34 +45,36 @@ class UnivGeometricBrownianMotion:
         self._sigma = jnp.asarray(sigma, dtype=dtype)
 
     @property
-    def mean(self):
+    def mean(self) -> jax.Array:
         """
         :return: Returns the mean of the GBM
         """
         return self._mean
 
     @property
-    def sigma(self):
+    def sigma(self) -> jax.Array:
         """
         :return: Returns the standard deviation of the GBM
         """
         return self._sigma
 
     @property
-    def s0(self):
+    def s0(self) -> jax.Array:
         """
         :return: Returns the initial value of the GBM
         """
         return self._s0
 
     @property
-    def dtype(self):
+    def dtype(self) -> jax.numpy.dtype:
         """
         :return: Returns the underlying dtype of the GBM
         """
         return self._dtype
 
-    def simulate_paths(self, seed: int, maturity, n: int, n_sim: int) -> jax.Array:
+    def simulate_paths(
+        self, seed: int, maturity: float, n: int, n_sim: int
+    ) -> jax.Array:
         """
         Simulate a sample of paths from the GBM
 
@@ -95,7 +113,28 @@ class MultiGeometricBrownianMotion:
     paths = gmb_process.simulate_paths(maturity=1.0, n=100, n_sim=100)
     """
 
-    def __init__(self, s0, mean, sigma, corr, dtype=jnp.float32):
+    def __init__(
+        self,
+        s0: Union[jax.Array, List[float]],
+        mean: Union[jax.Array, List[float]],
+        sigma: Union[jax.Array, List[float]],
+        corr: jax.Array,
+        dtype: Optional[jax.numpy.dtype] = jnp.float32,
+    ):
+        """Multivariate GBM constructor
+
+        Args:
+            s0 (Union[jax.Array, List[float]]): the initial values of the GBM
+            mean (Union[jax.Array, List[float]]): the mean of the GBM
+            sigma (Union[jax.Array, List[float]]): the standard deviation of the GBM
+            corr (jax.Array): the correlation matrix of the GBM
+            dtype (Optional[jax.numpy.dtype], optional): the type of the arrays. Defaults to jnp.float32.
+
+        Raises:
+            ValueError: when the dtype is None
+            ValueError: When the correlation matrix is not symmetric
+            ValueError: When the correlation matrix does not have ones as diagonal elements
+        """
         if dtype is None:
             raise ValueError("dtype must not be None")
 
@@ -113,48 +152,50 @@ class MultiGeometricBrownianMotion:
         self._dim = self._s0.shape[0]
 
     @property
-    def mean(self):
+    def mean(self) -> jax.Array:
         """
         :return: Returns the mean of the GBM
         """
         return self._mean
 
     @property
-    def sigma(self):
+    def sigma(self) -> jax.Array:
         """
         :return: Returns the standard deviation of the GBM
         """
         return self._sigma
 
     @property
-    def corr(self):
+    def corr(self) -> jax.Array:
         """
         :return: Returns the correlation matrix of the Weiner processes
         """
         return self._corr
 
     @property
-    def s0(self):
+    def s0(self) -> jax.Array:
         """
         :return: Returns the initial value of the GBM
         """
         return self._s0
 
     @property
-    def dtype(self):
+    def dtype(self) -> jax.numpy.dtype:
         """
         :return: Returns the underlying dtype of the GBM
         """
         return self._dtype
 
     @property
-    def dimension(self):
+    def dimension(self) -> int:
         """
         :return: Returns the dimension of the GBM
         """
         return self._dim
 
-    def simulate_paths(self, seed: int, maturity, n: int, n_sim: int) -> jax.Array:
+    def simulate_paths(
+        self, seed: int, maturity: float, n: int, n_sim: int
+    ) -> jax.Array:
         """
         Simulate a sample of paths from the GBM
 
@@ -187,7 +228,7 @@ class MultiGeometricBrownianMotion:
         return samples.transpose(1, 0, 2)[::-1, :, :]
 
 
-def _check_symmetric(a, tol=1e-8):
+def _check_symmetric(a: jax.Array, tol=1e-8):
     """
     Check if a matrix is symmetric
 
