@@ -1,5 +1,5 @@
 """Geometric Brownian Motion class implementation"""
-from typing import Union, Optional, List
+from typing import List, Optional, Union
 
 import jax
 import jax.numpy as jnp

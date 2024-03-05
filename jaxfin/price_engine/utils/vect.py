@@ -1,11 +1,11 @@
 """
 Vectorization realted function used by the price engine module
 """
-from typing import Callable, Optional, Tuple, Union, TypeVar
+from typing import Callable, Optional, Tuple, TypeVar, Union
+
 import jax
 import jax.numpy as jnp
 from jax import jit, vmap
-
 
 F = TypeVar("F", bound=Callable)
 

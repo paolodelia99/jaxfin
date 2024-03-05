@@ -1,7 +1,7 @@
 """
 Black Scholes prices for Vanilla European options
 """
-from typing import Callable, Optional, Union, TypeVar
+from typing import Callable, Optional, TypeVar, Union
 
 import jax
 import jax.numpy as jnp
@@ -9,7 +9,6 @@ from jax import grad, jit
 
 from ..math.bs_common import compute_discounted_call_prices
 from ..utils.arrays import cast_arrays
-
 
 F = TypeVar("F", bound=Callable)
 
