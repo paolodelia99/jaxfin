@@ -25,7 +25,11 @@ pip install JaxFin
 
 ## Quickstart
 
-Here's a quick example of how to use the project:
+You now might wonder why use `jaxfin` in first place, what's the advantage to any other quantitative finance library available in Python? Well if don't know it `jax` is basically `NumPy`, on steroids, which in short that  means it provides the familiar and intuitive interface of NumPy but with the added benefits of automatic differentiation, GPU/TPU support, and JIT compilation. 
+
+`jaxfin` combines the best of both worlds: the power and performance of `jax`, with the simplicity and familiarity of standard Python libraries. This makes it a powerful tool for any quantitative finance professional or enthusiast.
+
+Here's a small example to illustrate of you can use `jaxfin` to price a European option using the Black-Scholes model:
 
 ```python
 import jax.numpy as jnp
@@ -37,8 +41,52 @@ strikes = jnp.asarray([110])
 expires = jnp.asarray([1.0])
 vols = jnp.asarray([0.2])
 discount_rates = jnp.asarray([0.0])
-print(european_price(spots, strikes, expires, vols, discount_rates, dtype=jnp.float32))
+european_price(spots, strikes, expires, vols, discount_rates, dtype=jnp.float32)
 ```
+
+Computing the price price of a single option, nahh that's boring! what we can do with jaxfin is to compute the price of a basket of options leveraging the vectorization capabilities of `jax`:
+
+```python
+import jax.numpy as jnp
+from jaxfin.price_engine.black_scholes import european_price
+
+# Black-Scholes price of an european option
+spots = jnp.asarray([100, 110, 120])
+strikes = jnp.asarray([110, 120, 130])
+expires = jnp.asarray([1.0, 1.0, 1.0])
+vols = jnp.asarray([0.2, 0.2, 0.2])
+discount_rates = jnp.asarray([0.0, 0.0, 0.0])
+are_calls = jnp.array([True, False, False, True, True], dtype=jnp.bool_)
+european_price(spots, strikes, expires, vols, discount_rates, are_calls, dtype=jnp.float32)
+```
+
+In addition to that the calculation of the greeks, is done not throught the closed form formulas but through the automatic differentiation capabilities of `jax`. For example the function that calculates the delta of the european option under the Black Scholes model can be simply obtained as follows:
+
+```python
+delta_european = jax.grad(european_price, argnums=0)
+
+# Black-Scholes delta of an european option
+spots = jnp.asarray(100)
+strikes = jnp.asarray(110)
+expires = jnp.asarray(1.0)
+vols = jnp.asarray(0.2)
+discount_rates = jnp.asarray(0.0)
+delta_european(spots, strikes, expires, vols, discount_rates, dtype=jnp.float32)
+```
+
+### Funcionalities implemented
+
+- Price engine
+    - Black scholes
+        - Pricing european options
+        - Greeks of european options
+    - Black model
+        - Pricing european options
+        - Greeks of european options (just delta and gamma)
+- Models
+    - Geometric brownian motion
+      - Univariate 
+      - Multivariate
 
 ## Building the Library Locally
 
