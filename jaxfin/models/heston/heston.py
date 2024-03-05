@@ -10,7 +10,7 @@ from jax import jit, random
 
 class UnivHestonModel:
     """
-    Heston Model
+    Univariate Heston Model
 
     Represent a 1-dimensional Heston model
 
