@@ -28,13 +28,16 @@ class UnivGeometricBrownianMotion:
         sigma: Union[jax.Array, float],
         dtype: Optional[jax.numpy.dtype] = jnp.float32,
     ):
-        """
-        GBM constructor
+        """GBM constructor
 
-        :param s0: (Union[jax.Array, float]): Initial value of the GBM
-        :param mean: (Union[jax.Array, float]): Mean of the GBM
-        :param sigma: (Union[jax.Array, float]): Standard deviation of the GBM
-        :param dtype: (Optional[jax.numpy.dtype]): Underlying dtype of the GBM
+        Args:
+            s0 (Union[jax.Array, float]): The initial value of the GBM
+            mean (Union[jax.Array, float]): The drift term (mean) of the GBM
+            sigma (Union[jax.Array, float]): The standard deviation of the GBM
+            dtype (Optional[jax.numpy.dtype], optional): The dtype of the GBM. Defaults to jnp.float32.
+
+        Raises:
+            ValueError: When the dtype is None
         """
         if dtype is None:
             raise ValueError("dtype must not be None")
@@ -46,42 +49,51 @@ class UnivGeometricBrownianMotion:
 
     @property
     def mean(self) -> jax.Array:
-        """
-        :return: Returns the mean of the GBM
+        """Return the mean of the GBM
+
+        Returns:
+            jax.Array: The mean of the GBM
         """
         return self._mean
 
     @property
     def sigma(self) -> jax.Array:
-        """
-        :return: Returns the standard deviation of the GBM
+        """Return the standard deviation of the GBM
+
+        Returns:
+            jax.Array: The standard deviation of the GBM
         """
         return self._sigma
 
     @property
     def s0(self) -> jax.Array:
-        """
-        :return: Returns the initial value of the GBM
+        """Return the initial value of the GBM
+
+        Returns:
+            jax.Array: The initial value of the GBM
         """
         return self._s0
 
     @property
     def dtype(self) -> jax.numpy.dtype:
-        """
-        :return: Returns the underlying dtype of the GBM
+        """Return the underlying dtype of the GBM
+
+        Returns:
+            jax.numpy.dtype: The dtype of the GBM
         """
         return self._dtype
 
-    def simulate_paths(
-        self, seed: int, maturity: float, n: int, n_sim: int
-    ) -> jax.Array:
+    def sample_paths(self, seed: int, maturity: float, n: int, n_sim: int) -> jax.Array:
         """
-        Simulate a sample of paths from the GBM
+        Simulate a sample of paths from the Geometric Brownian Motion (GBM).
 
-        :param maturity: time in years
-        :param n: (int): number of steps
-        :param n_sim: (int): number of simulations
-        :return: (jax.Array): Array containing the sample paths
+        Args:
+            maturity (float): Time in years.
+            n (int): Number of steps.
+            n_sim (int): Number of simulations.
+
+        Returns:
+            jax.Array: Array containing the sample paths.
         """
         key = random.PRNGKey(seed)
 
@@ -193,15 +205,17 @@ class MultiGeometricBrownianMotion:
         """
         return self._dim
 
-    def simulate_paths(
-        self, seed: int, maturity: float, n: int, n_sim: int
-    ) -> jax.Array:
+    def sample_paths(self, seed: int, maturity: float, n: int, n_sim: int) -> jax.Array:
         """
-        Simulate a sample of paths from the GBM
+        Simulate a sample of paths from the Multivariate Geometric Brownian Motion (GBM).
 
-        :param maturity: time in years
-        :param n: (int): number of steps
-        :return: (jax.Array): Array containing the sample paths
+        Args:
+            maturity (float): Time in years.
+            n (int): Number of steps.
+            n_sim (int): Number of simulations.
+        
+        Returns:
+            jax.Array: Array containing the sample paths.
         """
         key = random.PRNGKey(seed)
 
