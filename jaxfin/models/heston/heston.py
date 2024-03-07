@@ -63,57 +63,73 @@ class UnivHestonModel:
 
     @property
     def mean(self) -> jax.Array:
-        """
-        :return: Returns the mean of the Heston model
+        """Returns the mean of the Heston model
+
+        Returns:
+            jax.Array: The mean of the Heston model
         """
         return self._mean
 
     @property
     def kappa(self) -> jax.Array:
-        """
-        :return: Returns the speed of the mean-reversion of the variance
+        """Returns the speed of the mean-reversion of the variance
+
+        Returns:
+            jax.Array: The speed of the mean-reversion of the variance
         """
         return self._kappa
 
     @property
     def theta(self) -> jax.Array:
-        """
-        :return: Returns the long-term mean of the variance
+        """Returns the long-term mean of the variance
+
+        Returns:
+            jax.Array: The long-term mean of the variance
         """
         return self._theta
 
     @property
     def sigma(self) -> jax.Array:
-        """
-        :return: Returns the volatility of the variance
+        """Returns the volatility of the variance
+
+        Returns:
+            jax.Array: The volatility of the variance
         """
         return self._sigma
 
     @property
     def rho(self) -> jax.Array:
-        """
-        :return: Returns the correlation between the asset and the variance
+        """Returns the correlation between the asset and the variance
+
+        Returns:
+            jax.Array: The correlation between the asset and the variance
         """
         return self._rho
 
     @property
     def s0(self) -> jax.Array:
-        """
-        :return: Returns the initial value of the asset
+        """Returns the initial value of the asset
+
+        Returns:
+            jax.Array: The initial value of the asset
         """
         return self._s0
 
     @property
     def v0(self) -> jax.Array:
-        """
-        :return: Returns the initial value of the variance of the asset
+        """Returns the initial value of the variance of the asset
+
+        Returns:
+            jax.Array: The initial value of the variance of the asset
         """
         return self._v0
 
     @property
     def dtype(self) -> jax.numpy.dtype:
-        """
-        :return: Returns the underlying dtype of the Heston model
+        """Returns the underlying dtype of the Heston model
+
+        Returns:
+            jax.numpy.dtype: The underlying dtype of the Heston model
         """
         return self._dtype
 

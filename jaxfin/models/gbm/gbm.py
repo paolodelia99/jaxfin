@@ -3,7 +3,7 @@ from typing import List, Optional, Union
 
 import jax
 import jax.numpy as jnp
-from jax import random
+from jax import jit, random
 
 
 class UnivGeometricBrownianMotion:
@@ -99,15 +99,19 @@ class UnivGeometricBrownianMotion:
 
         dt = maturity / n
 
-        Xt = jnp.exp(
-            (self._mean - self._sigma**2 / 2) * dt
-            + self._sigma * jnp.sqrt(dt) * random.normal(key, shape=(n_sim, n - 1)).T
-        )
+        W = random.normal(key, shape=(n_sim, n - 1)).T
 
-        Xt = jnp.vstack([jnp.ones(n_sim), Xt])
+        return _simulate_Xt(self._s0, self._mean, self._sigma, dt, n_sim, W)
 
-        return self._s0 * Xt.cumprod(axis=0)
+@jit
+def _simulate_Xt(s0: jax.Array, mean: jax.Array, sigma: jax.Array, dt: float, n_sim: int, W: jax.Array) -> jax.Array:
+    Xt = jnp.exp(
+            (mean - sigma**2 / 2) * dt
+            + sigma * jnp.sqrt(dt) * W)
+        
+    Xt = jnp.vstack([jnp.ones(n_sim), Xt])
 
+    return s0 * Xt.cumprod(axis=0)
 
 class MultiGeometricBrownianMotion:
     """
