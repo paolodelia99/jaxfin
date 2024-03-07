@@ -1,5 +1,5 @@
 import jax.numpy as jnp
-from jaxfin.models.heston.heston import UnivHestonModel, MultiVariateHestonModel
+from jaxfin.models.heston.heston import UnivHestonModel, MultiHestonModel
 
 SEED: int = 42
 
@@ -53,7 +53,7 @@ class TestMultiHestonModel():
         corr = jnp.array([[1.0, 0.5], [0.5, 1.0]], dtype=jnp.float32)
         dtype = jnp.float32
 
-        heston_model = MultiVariateHestonModel(s0, v0, mean, kappa, theta, sigma, corr, dtype=dtype)
+        heston_model = MultiHestonModel(s0, v0, mean, kappa, theta, sigma, corr, dtype=dtype)
 
         assert jnp.all(heston_model.mean == mean)
         assert jnp.all(heston_model.kappa == kappa)
@@ -73,7 +73,7 @@ class TestMultiHestonModel():
         sigma = jnp.array([0.3, 0.3], dtype=jnp.float32)
         corr = jnp.array([[1.0, 0.5], [0.5, 1.0]], dtype=jnp.float32)
 
-        heston_model = MultiVariateHestonModel(s0, v0, mean, kappa, theta, sigma, corr, dtype=jnp.float32)
+        heston_model = MultiHestonModel(s0, v0, mean, kappa, theta, sigma, corr, dtype=jnp.float32)
         paths = heston_model.sample_paths(seed=SEED, maturity=1.0, n=100, n_sim=100)
 
         assert paths.shape == (100, 100, 2)
