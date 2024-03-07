@@ -87,6 +87,9 @@ delta_european(spots, strikes, expires, vols, discount_rates, dtype=jnp.float32)
     - Geometric brownian motion
       - Univariate 
       - Multivariate
+    - Heston
+      - Univariate
+      - Multivariate
 
 ## Building the Library Locally
 

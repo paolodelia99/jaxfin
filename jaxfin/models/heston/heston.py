@@ -162,7 +162,7 @@ class UnivHestonModel:
         )
 
 
-class MultiVariateHestonModel:
+class MultiHestonModel:
     """Multivariate Heston Model
 
     Represent a multi-dimensional Heston model
