@@ -5,6 +5,8 @@ import jax
 import jax.numpy as jnp
 from jax import random
 
+from ..utils import check_symmetric
+
 
 class UnivGeometricBrownianMotion:
     """
@@ -150,7 +152,7 @@ class MultiGeometricBrownianMotion:
         if dtype is None:
             raise ValueError("dtype must not be None")
 
-        if not _check_symmetric(corr, 1e-8):
+        if not check_symmetric(corr, 1e-8):
             raise ValueError("Correlation matrix must be symmetric")
 
         if not jnp.array_equal(jnp.diag(corr), jnp.ones(corr.shape[0])):
@@ -213,7 +215,7 @@ class MultiGeometricBrownianMotion:
             maturity (float): Time in years.
             n (int): Number of steps.
             n_sim (int): Number of simulations.
-        
+
         Returns:
             jax.Array: Array containing the sample paths.
         """
@@ -240,14 +242,3 @@ class MultiGeometricBrownianMotion:
         cumsum = cumsum.transpose((1, 2, 0))
         samples = self._s0 * jnp.exp(cumsum)
         return samples.transpose(1, 0, 2)[::-1, :, :]
-
-
-def _check_symmetric(a: jax.Array, tol=1e-8):
-    """
-    Check if a matrix is symmetric
-
-    :param a: (jax.Array): Matrix to check
-    :param tol: (float): Tolerance for the check
-    :return: (bool): True if the matrix is symmetric
-    """
-    return jnp.all(jnp.abs(a - a.T) < tol)

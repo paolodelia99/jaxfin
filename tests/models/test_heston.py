@@ -1,5 +1,5 @@
 import jax.numpy as jnp
-from jaxfin.models.heston.heston import UnivHestonModel
+from jaxfin.models.heston.heston import UnivHestonModel, MultiVariateHestonModel
 
 SEED: int = 42
 
@@ -39,3 +39,41 @@ class TestUnivHestonModel():
         paths = heston_model.sample_paths(seed=SEED, maturity=1.0, n=100, n_sim=100)
 
         assert paths.shape == (100, 100)
+
+
+class TestMultiHestonModel():
+
+    def test_init(self):
+        s0 = jnp.array([100, 100], dtype=jnp.float32)
+        v0 = jnp.array([0.2, 0.2], dtype=jnp.float32)
+        mean = jnp.array([0.2, 0.2], dtype=jnp.float32)
+        kappa = jnp.array([2.0, 2.0], dtype=jnp.float32)
+        theta = jnp.array([0.25, 0.25], dtype=jnp.float32)
+        sigma = jnp.array([0.3, 0.3], dtype=jnp.float32)
+        corr = jnp.array([[1.0, 0.5], [0.5, 1.0]], dtype=jnp.float32)
+        dtype = jnp.float32
+
+        heston_model = MultiVariateHestonModel(s0, v0, mean, kappa, theta, sigma, corr, dtype=dtype)
+
+        assert jnp.all(heston_model.mean == mean)
+        assert jnp.all(heston_model.kappa == kappa)
+        assert jnp.all(heston_model.theta == theta)
+        assert jnp.all(heston_model.sigma == sigma)
+        assert jnp.all(heston_model.corr == corr)
+        assert heston_model.dtype == dtype
+        assert jnp.all(heston_model.s0 == s0)
+        assert jnp.all(heston_model.v0 == v0)
+
+    def test_sample_paths(self):
+        s0 = jnp.array([100, 100], dtype=jnp.float32)
+        v0 = jnp.array([0.2, 0.2], dtype=jnp.float32)
+        mean = jnp.array([0.2, 0.2], dtype=jnp.float32)
+        kappa = jnp.array([2.0, 2.0], dtype=jnp.float32)
+        theta = jnp.array([0.25, 0.25], dtype=jnp.float32)
+        sigma = jnp.array([0.3, 0.3], dtype=jnp.float32)
+        corr = jnp.array([[1.0, 0.5], [0.5, 1.0]], dtype=jnp.float32)
+
+        heston_model = MultiVariateHestonModel(s0, v0, mean, kappa, theta, sigma, corr, dtype=jnp.float32)
+        paths = heston_model.sample_paths(seed=SEED, maturity=1.0, n=100, n_sim=100)
+
+        assert paths.shape == (100, 100, 2)
