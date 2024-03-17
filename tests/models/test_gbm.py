@@ -4,8 +4,8 @@ from jaxfin.models.gbm import UnivGeometricBrownianMotion, MultiGeometricBrownia
 
 SEED: int = 42
 
-class TestUnivGBM:
 
+class TestUnivGBM:
     def test_init(self):
         s0 = 10
         mean = 0.1
@@ -31,7 +31,6 @@ class TestUnivGBM:
 
 
 class TestMultiGBM:
-
     def test_init(self):
         s0 = jnp.array([10, 12])
         mean = jnp.array([0.1, 0.0])
@@ -46,7 +45,6 @@ class TestMultiGBM:
         assert gbm.dtype == dtype
         assert jnp.array_equal(gbm.s0, s0)
         assert gbm.dimension == 2
-
 
     def test_sample_path(self):
         s0 = jnp.array([10, 12])

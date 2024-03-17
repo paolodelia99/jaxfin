@@ -3,8 +3,8 @@ from jaxfin.models.heston.heston import UnivHestonModel, MultiHestonModel
 
 SEED: int = 42
 
-class TestUnivHestonModel():
 
+class TestUnivHestonModel:
     def test_init(self):
         s0 = 100
         v0 = 0.2
@@ -15,7 +15,9 @@ class TestUnivHestonModel():
         rho = -0.7
         dtype = jnp.float32
 
-        heston_model = UnivHestonModel(s0, v0, mean, kappa, theta, sigma, rho, dtype=dtype)
+        heston_model = UnivHestonModel(
+            s0, v0, mean, kappa, theta, sigma, rho, dtype=dtype
+        )
 
         assert heston_model.mean == mean
         assert heston_model.kappa == kappa
@@ -35,14 +37,15 @@ class TestUnivHestonModel():
         sigma = jnp.array(0.3, dtype=jnp.float32)
         rho = jnp.array(-0.7, dtype=jnp.float32)
 
-        heston_model = UnivHestonModel(s0, v0, mean, kappa, theta, sigma, rho, dtype=jnp.float32)
+        heston_model = UnivHestonModel(
+            s0, v0, mean, kappa, theta, sigma, rho, dtype=jnp.float32
+        )
         paths = heston_model.sample_paths(seed=SEED, maturity=1.0, n=100, n_sim=100)
 
         assert paths.shape == (100, 100)
 
 
-class TestMultiHestonModel():
-
+class TestMultiHestonModel:
     def test_init(self):
         s0 = jnp.array([100, 100], dtype=jnp.float32)
         v0 = jnp.array([0.2, 0.2], dtype=jnp.float32)
@@ -53,7 +56,9 @@ class TestMultiHestonModel():
         corr = jnp.array([[1.0, 0.5], [0.5, 1.0]], dtype=jnp.float32)
         dtype = jnp.float32
 
-        heston_model = MultiHestonModel(s0, v0, mean, kappa, theta, sigma, corr, dtype=dtype)
+        heston_model = MultiHestonModel(
+            s0, v0, mean, kappa, theta, sigma, corr, dtype=dtype
+        )
 
         assert jnp.all(heston_model.mean == mean)
         assert jnp.all(heston_model.kappa == kappa)
@@ -73,7 +78,9 @@ class TestMultiHestonModel():
         sigma = jnp.array([0.3, 0.3], dtype=jnp.float32)
         corr = jnp.array([[1.0, 0.5], [0.5, 1.0]], dtype=jnp.float32)
 
-        heston_model = MultiHestonModel(s0, v0, mean, kappa, theta, sigma, corr, dtype=jnp.float32)
+        heston_model = MultiHestonModel(
+            s0, v0, mean, kappa, theta, sigma, corr, dtype=jnp.float32
+        )
         paths = heston_model.sample_paths(seed=SEED, maturity=1.0, n=100, n_sim=100)
 
         assert paths.shape == (100, 100, 2)

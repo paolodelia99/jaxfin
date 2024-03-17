@@ -10,9 +10,11 @@ venv/*
 **/.pytest_cache
 **/__pycache__/
 **/.mypy_cache
+**/.ruff_cache/
 
-# Pylint output
+# Linter output
 pylint_res.txt
+linter_res.txt
 
 # Examples folder 
 jaxfin/examples/

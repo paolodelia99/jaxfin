@@ -1,4 +1,4 @@
-name: Pylint
+name: Linting
 
 on: [push]
 
@@ -18,6 +18,6 @@ jobs:
       run: |
         python -m pip install --upgrade pip
         pip install -r requirements/build.txt
-    - name: Analysing the code with pylint
+    - name: Analysing the code with ruff
       run: |
-        pylint $(git ls-files 'jaxfin/*.py') --output-format=text:pylint_res.txt,colorized
+        ruff check jaxfin --output-format=full
