@@ -1,6 +1,6 @@
 import jax.numpy as jnp
 
-from jaxfin.models.gbm import UnivGeometricBrownianMotion, MultiGeometricBrownianMotion
+from jaxfin.models.gbm import MultiGeometricBrownianMotion, UnivGeometricBrownianMotion
 
 SEED: int = 42
 

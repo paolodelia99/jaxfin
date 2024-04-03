@@ -1,5 +1,6 @@
 import jax.numpy as jnp
-from jaxfin.models.heston.heston import UnivHestonModel, MultiHestonModel
+
+from jaxfin.models.heston.heston import MultiHestonModel, UnivHestonModel
 
 SEED: int = 42
 
