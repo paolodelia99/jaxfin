@@ -15,9 +15,7 @@ complete-lint:
 	pylint jaxfin --output-format=text:pylint_res.txt,colorized
 
 format:
-	# Sort imports
 	isort ${LINT_PATHS}
-	# Reformat using black
 	black ${LINT_PATHS}
 
 check-codestyle:
