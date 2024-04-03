@@ -44,20 +44,24 @@ discount_rates = jnp.asarray([0.0])
 european_price(spots, strikes, expires, vols, discount_rates, dtype=jnp.float32)
 ```
 
-Computing the price price of a single option, nahh that's boring! what we can do with jaxfin is to compute the price of a basket of options leveraging the vectorization capabilities of `jax`:
+Computing the price price of a single option, nahh that's boring! what we can do with jaxfin is to compute the price of a basket of options leveraging the vectorization capabilities of `jax` using `jax.vmap`:
 
 ```python
+from jax import vmap
 import jax.numpy as jnp
 from jaxfin.price_engine.black_scholes import european_price
 
+v_european_price = vmap(european_price, in_axes=(0, None, None, None, None))
+
 # Black-Scholes price of an european option
-spots = jnp.asarray([100, 110, 120])
-strikes = jnp.asarray([110, 120, 130])
-expires = jnp.asarray([1.0, 1.0, 1.0])
-vols = jnp.asarray([0.2, 0.2, 0.2])
-discount_rates = jnp.asarray([0.0, 0.0, 0.0])
-are_calls = jnp.array([True, False, False, True, True], dtype=jnp.bool_)
-european_price(spots, strikes, expires, vols, discount_rates, are_calls, dtype=jnp.float32)
+spots = jnp.asarray([80, 90, 100, 110, 120])
+strikes = jnp.asarray(110)
+expires = jnp.asarray(1.0)
+vols = jnp.asarray(0.2)
+discount_rates = jnp.asarray(0.0)
+v_european_price(spots, strikes, expires, vols, discount_rates)
+
+>> Array([0.4424405, 1.6421748, 4.292015, 8.762122, 15.010387], dtype=float32)
 ```
 
 In addition to that the calculation of the greeks, is done not throught the closed form formulas but through the automatic differentiation capabilities of `jax`. For example the function that calculates the delta of the european option under the Black Scholes model can be simply obtained as follows:
@@ -83,6 +87,9 @@ delta_european(spots, strikes, expires, vols, discount_rates, dtype=jnp.float32)
     - Black model
         - Pricing european options
         - Greeks of european options (just delta and gamma)
+    - Fourier methods
+        - Pricing european options using inverse fourier transform
+        - Greeks of european options (just delta)
 - Models
     - Geometric brownian motion
       - Univariate 
@@ -128,6 +135,18 @@ To achieve that the following scripts have been provided
 - `scripts\run-tests.bat`: This script runs the unit tests for the project.
 - `scripts\run-mypy.bat`: This script runs Mypy, a static type checker for Python. Mypy can catch certain types of errors at compile time that would otherwise only be caught at runtime in standard Python. It's a way to get some of the benefits of static typing in a dynamically typed language.
 - `scripts\check-black.bat`: This script runs Black, the "uncompromising" Python code formatter. By using it, you ensure that your codebase has a consistent style, which can make it easier to read and maintain.
+
+Otherwise a `Makefile` have been provided to run all the pre-commit checks at once:
+
+```bash
+make commit-checks
+```
+
+To run the tests you can use the following command:
+
+```bash
+make pytest
+```
 
 ## Contributing
 
