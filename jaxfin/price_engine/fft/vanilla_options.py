@@ -1,14 +1,16 @@
-from jax import jit
+"""
+This module contains functions to price vanilla options using the Fourier inversion method.
+"""
+from functools import partial
+from typing import Callable
+
 import jax.numpy as jnp
+from jax import Array, jit
 from jax.scipy.integrate import trapezoid
 from jax.typing import ArrayLike
 
-from functools import partial
 
-from typing import Callable
-
-
-def _compute_probabilities(right_lim: ArrayLike, integrand_fn: Callable) -> float:
+def _compute_probabilities(right_lim: ArrayLike, integrand_fn: Callable) -> Array:
     """
     Compute the probabilities q1 and q2 for the Fourier inversion method
 
@@ -89,7 +91,7 @@ def fourier_inv_call(
     sigma: float,
     kappa: float,
     rho: float,
-):
+) -> Array:
     """
     Price of a call option using the Fourier inversion method
 
@@ -132,7 +134,7 @@ def fourier_inv_put(
     sigma: float,
     kappa: float,
     rho: float,
-):
+) -> Array:
     """
     Price of a put option using the Fourier inversion method
 
@@ -175,7 +177,7 @@ def delta_call_fourier(
     sigma: float,
     kappa: float,
     rho: float,
-):
+) -> Array:
     """
     Computes the delta of a call option using the Heston model.
 
