@@ -1,11 +1,10 @@
 import jax.numpy as jnp
-
 import pytest
 
 from jaxfin.price_engine.black import (
-    future_option_price,
     future_option_delta,
     future_option_gamma,
+    future_option_price,
 )
 from jaxfin.price_engine.utils.vect import get_vfunction
 
