@@ -10,6 +10,10 @@ type:
 lint:
 	ruff check jaxfin --output-format=full
 
+complete-lint:
+	lint
+	pylint jaxfin --output-format=text:pylint_res.txt,colorized
+
 format:
 	# Sort imports
 	isort ${LINT_PATHS}
