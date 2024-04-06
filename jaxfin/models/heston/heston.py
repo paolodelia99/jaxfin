@@ -1,7 +1,7 @@
 """
 Heston model class implementation
 """
-from typing import Optional, Union
+from typing import Optional, Tuple, Union
 
 import jax
 import jax.numpy as jnp
@@ -135,7 +135,9 @@ class UnivHestonModel:
         """
         return self._dtype
 
-    def sample_paths(self, seed: int, maturity: float, n: int, n_sim: int):
+    def sample_paths(
+        self, seed: int, maturity: float, n: int, n_sim: int
+    ) -> Tuple[jax.Array, jax.Array]:
         """
         Sample of paths from the Univariate Heston model
 
@@ -144,6 +146,9 @@ class UnivHestonModel:
             maturity (float): The time in years
             n (int): Number of steps (discretization points)
             n_sim (int): The number of simulations
+
+        Returns:
+            Tuple[jax.Array, jax.Array]: The simulated paths of the asset and the variance process
         """
         key = random.PRNGKey(seed)
 
@@ -288,7 +293,9 @@ class MultiHestonModel:
         """
         return self._dtype
 
-    def sample_paths(self, seed: int, maturity: float, n: int, n_sim: int) -> jax.Array:
+    def sample_paths(
+        self, seed: int, maturity: float, n: int, n_sim: int
+    ) -> Tuple[jax.Array, jax.Array]:
         """Sample paths from the Multivariate Heston model
 
         Args:
@@ -298,7 +305,7 @@ class MultiHestonModel:
             n_sim (int): The number of simulations
 
         Returns:
-            jax.Array: The simulated paths
+            Tuple[jax.Array, jax.Array]: The simulated paths and the variance processes of the assets
         """
         key = random.PRNGKey(seed)
 
@@ -358,7 +365,7 @@ def _sample_paths(
     W: jax.Array,
     Z: jax.Array,
     N: int,
-) -> jax.Array:
+) -> Tuple[jax.Array, jax.Array]:
     """Main function that simulate the path of the Heston model leveragin the
        jax.lax.while_loop function that allows to perform a loop in a jax makes
        it useful for reducing compilation times for jit-compiled functions,
@@ -378,7 +385,7 @@ def _sample_paths(
         N (int): The number of steps
 
     Returns:
-        jax.Array: The simulated paths of the stock(s)
+        Tuple[jax.Array, jax.Array]: The simulated paths of the stock(s), and the variance process(es)
     """
 
     def init_fn(W, Z):
@@ -408,6 +415,6 @@ def _sample_paths(
 
         return i + 1, S, v, W, Z
 
-    _, S, _, _, _ = jax.lax.while_loop(cond_fn, body_val, init_fn(W, Z))
+    _, S, v, _, _ = jax.lax.while_loop(cond_fn, body_val, init_fn(W, Z))
 
-    return S
+    return S, v

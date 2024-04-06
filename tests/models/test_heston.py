@@ -41,9 +41,12 @@ class TestUnivHestonModel:
         heston_model = UnivHestonModel(
             s0, v0, mean, kappa, theta, sigma, rho, dtype=jnp.float32
         )
-        paths = heston_model.sample_paths(seed=SEED, maturity=1.0, n=100, n_sim=100)
+        paths, variance_process = heston_model.sample_paths(
+            seed=SEED, maturity=1.0, n=100, n_sim=100
+        )
 
         assert paths.shape == (100, 100)
+        assert variance_process.shape == (100, 100)
 
 
 class TestMultiHestonModel:
@@ -82,6 +85,9 @@ class TestMultiHestonModel:
         heston_model = MultiHestonModel(
             s0, v0, mean, kappa, theta, sigma, corr, dtype=jnp.float32
         )
-        paths = heston_model.sample_paths(seed=SEED, maturity=1.0, n=100, n_sim=100)
+        paths, variance_processes = heston_model.sample_paths(
+            seed=SEED, maturity=1.0, n=100, n_sim=100
+        )
 
         assert paths.shape == (100, 100, 2)
+        assert variance_processes.shape == (100, 100, 2)
