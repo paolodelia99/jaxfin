@@ -1,8 +1,11 @@
 import jax.numpy as jnp
+import numpy as np
 
 from jaxfin.models.heston.heston import MultiHestonModel, UnivHestonModel
 
 SEED: int = 42
+
+np.random.seed(SEED)
 
 
 class TestUnivHestonModel:
@@ -42,7 +45,7 @@ class TestUnivHestonModel:
             s0, v0, mean, kappa, theta, sigma, rho, dtype=jnp.float32
         )
         paths, variance_process = heston_model.sample_paths(
-            seed=SEED, maturity=1.0, n=100, n_sim=100
+            maturity=1.0, n=100, n_sim=100
         )
 
         assert paths.shape == (100, 100)
@@ -86,7 +89,7 @@ class TestMultiHestonModel:
             s0, v0, mean, kappa, theta, sigma, corr, dtype=jnp.float32
         )
         paths, variance_processes = heston_model.sample_paths(
-            seed=SEED, maturity=1.0, n=100, n_sim=100
+            maturity=1.0, n=100, n_sim=100
         )
 
         assert paths.shape == (100, 100, 2)
