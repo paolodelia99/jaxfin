@@ -5,7 +5,7 @@ from typing import Optional, Tuple, Union
 
 import jax
 import jax.numpy as jnp
-from jax import jit, random
+import numpy as np
 
 from ..utils import check_symmetric
 
@@ -136,7 +136,7 @@ class UnivHestonModel:
         return self._dtype
 
     def sample_paths(
-        self, seed: int, maturity: float, n: int, n_sim: int
+        self, maturity: float, n: int, n_sim: int
     ) -> Tuple[jax.Array, jax.Array]:
         """
         Sample of paths from the Univariate Heston model
@@ -150,20 +150,37 @@ class UnivHestonModel:
         Returns:
             Tuple[jax.Array, jax.Array]: The simulated paths of the asset and the variance process
         """
-        key = random.PRNGKey(seed)
+        dt = maturity / (n - 1)
+        dt_sq = np.sqrt(dt)
 
-        dt = maturity / n
+        assert 2 * self.kappa * self.theta > self.sigma**2  # Feller condition
 
-        W = random.normal(key, shape=(n_sim, n)).T
-        Z = (
-            self._rho
-            * W
-            * jnp.sqrt(1 - self._rho**2)
-            * random.normal(key, shape=(n_sim, n)).T
-        )
+        # Generate random Brownian Motions for all paths and time steps
+        W_1 = np.random.normal(loc=0, scale=1, size=(n_sim, n - 1))
+        W_2 = np.random.normal(loc=0, scale=1, size=(n_sim, n - 1))
+        W_v = W_1
+        W_S = self._rho * W_1 + np.sqrt(1 - self._rho**2) * W_2
 
-        return _sample_paths(
-            self.s0, self.v0, self.mean, self.kappa, self.theta, self.sigma, dt, W, Z, n
+        # Initialize arrays to store trajectories
+        v_paths = np.zeros((n_sim, n))
+        S_paths = np.zeros((n_sim, n))
+        v_paths[:, 0] = self._v0
+        S_paths[:, 0] = self._s0
+
+        # Compute trajectories of v and S using vectorized operations
+        for t in range(1, n):
+            v_paths[:, t] = np.abs(
+                v_paths[:, t - 1]
+                + self._kappa * (self._theta - v_paths[:, t - 1]) * dt
+                + self._sigma * np.sqrt(v_paths[:, t - 1]) * dt_sq * W_v[:, t - 1]
+            )
+            S_paths[:, t] = S_paths[:, t - 1] * np.exp(
+                (self._mean - 0.5 * v_paths[:, t - 1]) * dt
+                + np.sqrt(v_paths[:, t - 1]) * dt_sq * W_S[:, t - 1]
+            )
+
+        return jnp.asarray(S_paths.T, dtype=self._dtype), jnp.asarray(
+            v_paths.T, dtype=self._dtype
         )
 
 
@@ -294,7 +311,7 @@ class MultiHestonModel:
         return self._dtype
 
     def sample_paths(
-        self, seed: int, maturity: float, n: int, n_sim: int
+        self, maturity: float, n: int, n_sim: int
     ) -> Tuple[jax.Array, jax.Array]:
         """Sample paths from the Multivariate Heston model
 
@@ -307,114 +324,31 @@ class MultiHestonModel:
         Returns:
             Tuple[jax.Array, jax.Array]: The simulated paths and the variance processes of the assets
         """
-        key = random.PRNGKey(seed)
-
         dt = maturity / n
+        dt_sq = np.sqrt(dt)
 
-        W = random.normal(key, shape=(n_sim, n * self._dim))
-        Z = random.normal(key, shape=(n_sim, n * self._dim))
-        W = jnp.reshape(W, (n_sim, n, self._dim)).transpose((1, 0, 2))
-        Z = jnp.reshape(Z, (n_sim, n, self._dim)).transpose((1, 0, 2))
+        W_1 = np.random.normal(loc=0, scale=1, size=(n_sim, n - 1, self._dim))
+        W_2 = np.random.normal(loc=0, scale=1, size=(n_sim, n - 1, self._dim))
+        W_v = W_1
+        W_S = W_1 @ self._corr + W_2 @ np.sqrt(1 - self._corr**2)
 
-        L = jnp.linalg.cholesky(self._corr)
+        v_paths = np.zeros((n_sim, n, self._dim))
+        S_paths = np.zeros((n_sim, n, self._dim))
+        v_paths[:, 0, :] = self._v0
+        S_paths[:, 0, :] = self._s0
 
-        epsilon_S = W @ L
-        epsilon_v = epsilon_S @ self._corr + Z @ jnp.sqrt(1 - self._corr**2)
+        # Compute trajectories of v and S using vectorized operations
+        for t in range(1, n):
+            v_paths[:, t, :] = np.abs(
+                v_paths[:, t - 1, :]
+                + self._kappa * (self._theta - v_paths[:, t - 1, :]) * dt
+                + self._sigma * np.sqrt(v_paths[:, t - 1, :]) * dt_sq * W_v[:, t - 1, :]
+            )
+            S_paths[:, t, :] = S_paths[:, t - 1, :] * np.exp(
+                (self._mean - 0.5 * v_paths[:, t - 1, :]) * dt
+                + np.sqrt(v_paths[:, t - 1, :]) * dt_sq * W_S[:, t - 1, :]
+            )
 
-        return _sample_paths(
-            self.s0,
-            self.v0,
-            self.mean,
-            self.kappa,
-            self.theta,
-            self.sigma,
-            dt,
-            epsilon_S,
-            epsilon_v,
-            n,
+        return jnp.asarray(S_paths.transpose(1, 0, 2)), jnp.asarray(
+            v_paths.transpose(1, 0, 2)
         )
-
-
-# Helpers
-
-
-def _variance_process_step(
-    v: jax.Array,
-    kappa: jax.Array,
-    theta: jax.Array,
-    sigma: jax.Array,
-    dt: jax.Array,
-    dZ: jax.Array,
-) -> jax.Array:
-    return (
-        v
-        + kappa * (theta - jnp.maximum(v, 0.0)) * dt
-        + sigma * jnp.sqrt(jnp.maximum(v, 0.0)) * jnp.sqrt(dt) * dZ
-    )
-
-
-@jit
-def _sample_paths(
-    s0: jax.Array,
-    v0: jax.Array,
-    mean: jax.Array,
-    kappa: jax.Array,
-    theta: jax.Array,
-    sigma: jax.Array,
-    dt: jax.Array,
-    W: jax.Array,
-    Z: jax.Array,
-    N: int,
-) -> Tuple[jax.Array, jax.Array]:
-    """Main function that simulate the path of the Heston model leveragin the
-       jax.lax.while_loop function that allows to perform a loop in a jax makes
-       it useful for reducing compilation times for jit-compiled functions,
-       since native Python loop constructs in an @jit function are unrolled,
-       leading to large XLA computations.
-
-    Args:
-        s0 (jax.Array): The initial price of the stock(s)
-        v0 (jax.Array): The initial variance of the stock(s)
-        mean (jax.Array): The mean of the stock(s)
-        kappa (jax.Array): The speed of the mean-reversion of the variance
-        theta (jax.Array): The long-term mean of the variance
-        sigma (jax.Array): The volatility of the variance of the stock(s)
-        dt (jax.Array): The time step
-        W (jax.Array): The Weiner process of the stock(s)
-        Z (jax.Array): The (correlated) Weiner process of the variance of the stock(s)
-        N (int): The number of steps
-
-    Returns:
-        Tuple[jax.Array, jax.Array]: The simulated paths of the stock(s), and the variance process(es)
-    """
-
-    def init_fn(W, Z):
-        W_ = W
-        Z_ = Z
-
-        S = jnp.full_like(W_, s0)
-        v = jnp.full_like(W_, v0)
-
-        return 0, S, v, W_, Z_
-
-    def cond_fn(val):
-        i, *_ = val
-        return i < N
-
-    def body_val(val):
-        i, S, v, W, Z = val
-        dW = W[i]
-        dZ = Z[i]
-
-        S = S.at[i + 1].set(
-            S[i]
-            * jnp.exp((mean - 0.5 * v[i]) * dt + jnp.sqrt(v[i]) * jnp.sqrt(dt) * dW)
-        )
-
-        v = v.at[i + 1].set(_variance_process_step(v[i], kappa, theta, sigma, dt, dZ))
-
-        return i + 1, S, v, W, Z
-
-    _, S, v, _, _ = jax.lax.while_loop(cond_fn, body_val, init_fn(W, Z))
-
-    return S, v
