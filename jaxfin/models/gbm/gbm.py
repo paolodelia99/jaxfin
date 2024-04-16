@@ -3,7 +3,7 @@ from typing import List, Optional, Union
 
 import jax
 import jax.numpy as jnp
-from jax import random
+import numpy as np
 
 from ..utils import check_symmetric
 
@@ -85,7 +85,7 @@ class UnivGeometricBrownianMotion:
         """
         return self._dtype
 
-    def sample_paths(self, seed: int, maturity: float, n: int, n_sim: int) -> jax.Array:
+    def sample_paths(self, maturity: float, n: int, n_sim: int) -> jax.Array:
         """
         Simulate a sample of paths from the Geometric Brownian Motion (GBM).
 
@@ -97,18 +97,18 @@ class UnivGeometricBrownianMotion:
         Returns:
             jax.Array: Array containing the sample paths.
         """
-        key = random.PRNGKey(seed)
-
         dt = maturity / n
 
-        Xt = jnp.exp(
+        Xt = np.exp(
             (self._mean - self._sigma**2 / 2) * dt
-            + self._sigma * jnp.sqrt(dt) * random.normal(key, shape=(n_sim, n - 1)).T
+            + self._sigma
+            * np.sqrt(dt)
+            * np.random.normal(loc=0, scale=1, size=(n_sim, n - 1)).T
         )
 
-        Xt = jnp.vstack([jnp.ones(n_sim), Xt])
+        Xt = np.vstack([np.ones(n_sim), Xt])
 
-        return self._s0 * Xt.cumprod(axis=0)
+        return jnp.asarray(self._s0 * Xt.cumprod(axis=0))
 
 
 class MultiGeometricBrownianMotion:
@@ -207,7 +207,7 @@ class MultiGeometricBrownianMotion:
         """
         return self._dim
 
-    def sample_paths(self, seed: int, maturity: float, n: int, n_sim: int) -> jax.Array:
+    def sample_paths(self, maturity: float, n: int, n_sim: int) -> jax.Array:
         """
         Simulate a sample of paths from the Multivariate Geometric Brownian Motion (GBM).
 
@@ -219,12 +219,10 @@ class MultiGeometricBrownianMotion:
         Returns:
             jax.Array: Array containing the sample paths.
         """
-        key = random.PRNGKey(seed)
-
         dt = maturity / n
 
-        normal_draw = random.normal(key, shape=(n_sim, n * self._dim))
-        normal_draw = jnp.reshape(normal_draw, (n_sim, n, self._dim)).transpose(
+        normal_draw = np.random.normal(loc=0, scale=1, size=(n_sim, n * self._dim))
+        normal_draw = np.reshape(normal_draw, (n_sim, n, self._dim)).transpose(
             (1, 0, 2)
         )
 

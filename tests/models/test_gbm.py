@@ -1,8 +1,11 @@
 import jax.numpy as jnp
+import numpy as np
 
 from jaxfin.models.gbm import MultiGeometricBrownianMotion, UnivGeometricBrownianMotion
 
 SEED: int = 42
+
+np.random.seed(SEED)
 
 
 class TestUnivGBM:
@@ -25,7 +28,7 @@ class TestUnivGBM:
         dtype = jnp.float32
         gbm = UnivGeometricBrownianMotion(s0, mean, sigma, dtype)
 
-        stock_paths = gbm.sample_paths(SEED, 1.0, 52, 100)
+        stock_paths = gbm.sample_paths(1.0, 52, 100)
 
         assert stock_paths.shape == (52, 100)
 
@@ -53,6 +56,6 @@ class TestMultiGBM:
         corr = jnp.array([[1, 0.1], [0.1, 1]])
         dtype = jnp.float32
         gbm = MultiGeometricBrownianMotion(s0, mean, sigma, corr, dtype)
-        sample_path = gbm.sample_paths(SEED, 1.0, 52, 100)
+        sample_path = gbm.sample_paths(1.0, 52, 100)
 
         assert sample_path.shape == (52, 100, 2)
