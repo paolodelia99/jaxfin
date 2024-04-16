@@ -1,6 +1,9 @@
 SHELL=/bin/bash
 LINT_PATHS=jaxfin/ tests/
 
+build:
+	python -m build
+
 pytest:
 	python -m pytest --no-header -vv --html=test_report.html --self-contained-html
 
@@ -25,11 +28,11 @@ check-codestyle:
 commit-checks: format type lint
 
 release: 
-	python -m build
+	build
 	twine upload dist/*
 
 test-release: 
-	python -m build
+	build
 	twine upload dist/* -r testpypi
 
 .PHONY: clean spelling doc lint format check-codestyle commit-checks pylint
