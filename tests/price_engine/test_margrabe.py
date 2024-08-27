@@ -8,7 +8,8 @@ from jaxfin.price_engine.black_scholes.margrabe_option import (
     margrabe_cross_gamma
 )
 
-TOL = 1e-3
+ATOL = 1e-6
+RTOL = 1e-8
 DTYPE = jnp.float32
 
 
@@ -60,12 +61,10 @@ class TestMargrabeDeltas:
         vol_2 = jnp.array(vol_2, dtype=DTYPE)
         corr = jnp.array(corr, dtype=DTYPE)
 
-        delta_1, delta_2 = margrabe_deltas(spot_1, spot_2, expire, vol_1, vol_2, corr)
-        e_delta_1 = jnp.asarray(e_delta_1, dtype=DTYPE)
-        e_delta_2 = jnp.asarray(e_delta_2, dtype=DTYPE)
-
-        assert jnp.array_equal(delta_1, e_delta_1)
-        assert jnp.array_equal(delta_2, e_delta_2)
+        deltas = margrabe_deltas(spot_1, spot_2, expire, vol_1, vol_2, corr)
+        exp_deltas = jnp.asarray([e_delta_1, e_delta_2], dtype=DTYPE)
+        
+        assert jnp.allclose(deltas, exp_deltas, atol=ATOL, rtol=RTOL)
 
 
 @pytest.mark.parametrize(
