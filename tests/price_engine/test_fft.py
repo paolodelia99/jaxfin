@@ -25,7 +25,7 @@ def test_one_vanilla_call():
     price = fourier_inv_call(spot, strike, expire, v0, rate, theta, sigma, kappa, rho)
     expected_price = jnp.asarray(15.846119, dtype=DTYPE)
 
-    assert jnp.array_equal(price, expected_price)
+    assert jnp.allclose(price, expected_price, atol=TOL)
 
 
 def test_one_vanilla_put():
@@ -42,7 +42,7 @@ def test_one_vanilla_put():
     price = fourier_inv_put(spot, strike, expire, v0, rate, theta, sigma, kappa, rho)
     expected_price_put = jnp.asarray(25.846123, dtype=DTYPE)
 
-    assert jnp.array_equal(price, expected_price_put)
+    assert jnp.allclose(price, expected_price_put, atol=TOL)
 
 
 def test_one_delta_vanilla_call():

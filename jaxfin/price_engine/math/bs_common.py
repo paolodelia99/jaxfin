@@ -13,14 +13,17 @@ from .norm import cum_normal
 
 def _compute_d1_d2(spots, strikes, expires, vols, discount_rates):
     """
-    Compute the d1 and d2 terms in the Black-Scholes formula
+    Compute the d1 and d2 terms in the Black-Scholes formula.
 
-    :param spots: Current spot price of the underlying
-    :param strikes: Strike price of the option
-    :param expires: Time to expiration of the option
-    :param vols: Volatility of the underlying
-    :param discount_rates: Risk-free rate
-    :return: d1 and d2 terms
+    Args:
+        spots (float): Current spot price of the underlying.
+        strikes (float): Strike price of the option.
+        expires (float): Time to expiration of the option.
+        vols (float): Volatility of the underlying.
+        discount_rates (float): Risk-free rate.
+
+    Returns:
+        tuple: A tuple containing the d1 and d2 terms.
     """
     vol_sqrt_t = vols * jnp.sqrt(expires)
 
@@ -32,14 +35,17 @@ def _compute_d1_d2(spots, strikes, expires, vols, discount_rates):
 @jit
 def d1_bs(spots, strikes, vols, expires, discount_rates):
     """
-    Calculate the d1 term in the Black-Scholes formula
+    Calculate the d1 term in the Black-Scholes formula.
 
-    :param spots: Current spot price of the underlying
-    :param strikes: Strike price of the option
-    :param vols: Volatility of the underlying
-    :param expires: Time to expiration of the option
-    :param discount_rates: Risk-free rate
-    :return: d1 term
+    Args:
+        spots (float): Current spot price of the underlying.
+        strikes (float): Strike price of the option.
+        vols (float): Volatility of the underlying.
+        expires (float): Time to expiration of the option.
+        discount_rates (float): Risk-free rate.
+
+    Returns:
+        float: The d1 term.
     """
     vol_sqrt_t = vols * jnp.sqrt(expires)
 
@@ -52,14 +58,17 @@ def d1_bs(spots, strikes, vols, expires, discount_rates):
 @jit
 def compute_undiscounted_call_prices(spots, strikes, expires, vols, discount_rates):
     """
-    Compute the undiscounted call option prices
+    Compute the undiscounted call option prices.
 
-    :param spots: Current spot price of the underlying
-    :param strikes: Strike price of the option
-    :param expires: Time to expiration of the option
-    :param vols: Volatility of the underlying
-    :param discount_rates: Risk-free rate
-    :return: Undiscounted call option prices
+    Args:
+        spots (float): Current spot price of the underlying.
+        strikes (float): Strike price of the option.
+        expires (float): Time to expiration of the option.
+        vols (float): Volatility of the underlying.
+        discount_rates (float): Risk-free rate.
+
+    Returns:
+        float: Undiscounted call option prices.
     """
     [_d1, _d2] = _compute_d1_d2(spots, strikes, expires, vols, discount_rates)
 
@@ -69,14 +78,17 @@ def compute_undiscounted_call_prices(spots, strikes, expires, vols, discount_rat
 @jit
 def compute_discounted_call_prices(spots, strikes, expires, vols, discount_rates):
     """
-    Compute the discounted call option prices
+    Compute the discounted call option prices.
 
-    :param spots: Current spot price of the underlying
-    :param strikes: Strike price of the option
-    :param expires: Time to expiration of the option
-    :param vols: Volatility of the underlying
-    :param discount_rates: Risk-free rate
-    :return: Discounted call option prices
+    Args:
+        spots (float): Current spot price of the underlying.
+        strikes (float): Strike price of the option.
+        expires (float): Time to expiration of the option.
+        vols (float): Volatility of the underlying.
+        discount_rates (float): Risk-free rate.
+
+    Returns:
+        float: Discounted call option prices.
     """
     [_d1, _d2] = _compute_d1_d2(spots, strikes, expires, vols, discount_rates)
 

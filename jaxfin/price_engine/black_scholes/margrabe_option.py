@@ -14,25 +14,27 @@ from ..math.norm import cum_normal
 
 @jit
 def margrabe(
-    spots_1: jax.Array,
-    spots_2: jax.Array,
-    expires: jax.Array,
-    sigma_1: jax.Array,
-    sigma_2: jax.Array,
-    corr: jax.Array,
+    spots_1: Union[float, jax.Array],
+    spots_2: Union[float, jax.Array],
+    expires: Union[float, jax.Array],
+    sigma_1: Union[float, jax.Array],
+    sigma_2: Union[float, jax.Array],
+    corr: Union[float, jax.Array],
 ) -> jax.Array:
     """
     Calculate the price of a spread option max(S_2 - S_1, 0) using the Margrabe formula.
     Both S_2 and S_1 are assumed to be log-normally distributed with correlation corr.
 
-    :param spots_1: The spot price of the first asset
-    :param spots_2: The spot price of the second asset
-    :param expires: The time to expiration of the option
-    :param sigma_1: The volatility of the first asset
-    :param sigma_2: The volatility of the second asset
-    :param corr: The correlation between the two assets
-    :param dtype: The dtype of the input
-    :return: The price of the spread option
+    Args:
+        spots_1 (Union[float, jax.Array]): The spot price of the first asset.
+        spots_2 (Union[float, jax.Array]): The spot price of the second asset.
+        expires (Union[float, jax.Array]): The time to expiration of the option.
+        sigma_1 (Union[float, jax.Array]): The volatility of the first asset.
+        sigma_2 (Union[float, jax.Array]): The volatility of the second asset.
+        corr (Union[float, jax.Array]): The correlation between the two assets.
+
+    Returns:
+        jax.Array: The price of the spread option.
     """
     d1, d2 = d1_d2_margrabe(spots_1, spots_2, expires, sigma_1, sigma_2, corr)
 
